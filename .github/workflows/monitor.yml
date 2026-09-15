@@ -1,0 +1,46 @@
+name: Мониторинг разъяснений ЦБ
+
+on:
+  schedule:
+    # Время в UTC. Москва = UTC+3.
+    # Оба окна попадают в льготный тариф DeepSeek (06:00-10:00 UTC),
+    # чтобы будущий вызов модели стоил вдвое дешевле.
+    - cron: '0 6 * * 1-5'    # 09:00 МСК, рабочие дни
+    - cron: '30 9 * * 1-5'   # 12:30 МСК, рабочие дни
+  workflow_dispatch:          # и кнопка «запустить вручную»
+
+permissions:
+  contents: write             # нужно, чтобы коммитить состояние обратно в репозиторий
+
+concurrency:
+  group: cbr-monitor
+  cancel-in-progress: false   # прогоны не должны накладываться и портить состояние
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10       # зависший прогон обязан умереть сам
+
+    steps:
+      - name: Забрать репозиторий
+        uses: actions/checkout@v4
+
+      - name: Поставить Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Прогон наблюдателя
+        run: python watch_cbr.py --state state.json --report docs/index.html
+
+      - name: Зафиксировать состояние
+        run: |
+          git config user.name  "cbr-monitor"
+          git config user.email "cbr-monitor@users.noreply.github.com"
+          git add state.json docs/index.html
+          if git diff --staged --quiet; then
+            echo "Состояние не изменилось — коммит не нужен."
+          else
+            git commit -m "Мониторинг ЦБ: прогон $(date -u +'%Y-%m-%d %H:%M UTC')"
+            git push
+          fi

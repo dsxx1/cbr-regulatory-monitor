@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Мониторинг разъяснений Банка России — ломбарды</title>
+<style>
+  :root { --bg:#fbfbfa; --fg:#1a1a18; --mut:#6b6b66; --line:#e3e3df; --card:#fff;
+          --new:#1f7a4d; --chg:#9a6700; --err:#b42318; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#16161a; --fg:#e8e8e4; --mut:#9a9a94; --line:#2c2c32; --card:#1e1e24;
+            --new:#4ac585; --chg:#e0a72b; --err:#f2776a; }
+  }
+  * { box-sizing:border-box }
+  body { margin:0; padding:2rem 1.25rem; background:var(--bg); color:var(--fg);
+         font:15px/1.6 -apple-system,Segoe UI,Roboto,sans-serif }
+  .wrap { max-width:940px; margin:0 auto }
+  h1 { font-size:1.45rem; margin:0 0 .35rem }
+  .sub { color:var(--mut); margin:0 0 1.75rem; font-size:.9rem }
+  .stats { display:flex; flex-wrap:wrap; gap:.75rem; margin-bottom:1.75rem }
+  .stat { flex:1 1 130px; background:var(--card); border:1px solid var(--line);
+          border-radius:10px; padding:.85rem 1rem }
+  .stat b { display:block; font-size:1.6rem; line-height:1.2 }
+  .stat span { color:var(--mut); font-size:.8rem }
+  h2 { font-size:1rem; text-transform:uppercase; letter-spacing:.06em;
+       color:var(--mut); margin:2rem 0 .85rem; font-weight:600 }
+  .card { background:var(--card); border:1px solid var(--line); border-left-width:3px;
+          border-radius:8px; padding:1rem 1.15rem; margin-bottom:.75rem }
+  .card.new { border-left-color:var(--new) }
+  .card.changed { border-left-color:var(--chg) }
+  .tag { font-size:.7rem; text-transform:uppercase; letter-spacing:.08em; font-weight:700 }
+  .new .tag { color:var(--new) } .changed .tag { color:var(--chg) }
+  .card h3 { font-size:.98rem; margin:.4rem 0 .5rem; font-weight:600 }
+  .card p { margin:0 0 .6rem; opacity:.85; font-size:.9rem }
+  .card footer { font-size:.75rem; color:var(--mut); font-family:ui-monospace,Consolas,monospace }
+  .empty { background:var(--card); border:1px dashed var(--line); border-radius:8px;
+           padding:1.1rem 1.15rem; color:var(--mut) }
+  .empty.warn { border-color:var(--chg); color:var(--chg) }
+  table { width:100%; border-collapse:collapse; font-size:.85rem }
+  th,td { text-align:left; padding:.55rem .6rem; border-bottom:1px solid var(--line) }
+  th { color:var(--mut); font-weight:600; font-size:.75rem; text-transform:uppercase; letter-spacing:.05em }
+  td.ok { color:var(--new) } td.err { color:var(--err); font-weight:600 }
+  .foot { margin-top:2.5rem; padding-top:1rem; border-top:1px solid var(--line);
+          color:var(--mut); font-size:.8rem }
+</style></head><body><div class="wrap">
+
+<h1>Мониторинг разъяснений Банка России</h1>
+<p class="sub">Периметр: ломбарды. Прогон №1 от 15.09.2026 12:56:17 UTC</p>
+
+<div class="stats">
+  <div class="stat"><b>0</b><span>новых</span></div>
+  <div class="stat"><b>0</b><span>изменилось</span></div>
+  <div class="stat"><b>28</b><span>без изменений</span></div>
+  <div class="stat"><b>28</b><span>под наблюдением</span></div>
+  <div class="stat"><b>0</b><span>отказов источников</span></div>
+</div>
+
+
+
+<h2>Сигналы этого прогона</h2>
+<div class="empty">Первый прогон: база наполнена, всё записано как исходное состояние. Сигналы начнутся со следующего запуска.</div>
+
+<h2>Состояние источников</h2>
+<table><thead><tr><th>Источник</th><th>Статус</th><th>Подробности</th></tr></thead>
+<tbody>
+<tr><td>Дерево категорий 426</td><td class="ok">ok</td><td>подкатегорий: 1</td></tr>
+<tr><td>Разъяснения, категория 774</td><td class="ok">ok</td><td>записей: 17</td></tr>
+<tr><td>Разъяснения, категория 378</td><td class="ok">ok</td><td>записей: 11</td></tr>
+</tbody></table>
+
+<div class="foot">
+  Прототип решающего контура. Отслеживается хеш нормализованного текста, а не вёрстка,
+  поэтому переформатирование страницы сигналом не считается.
+  Поле <code>modification</code> — время правки разъяснения, а не дата вступления
+  требования в силу; дату вступления подтверждает человек.
+  Состояние: <code>state.json</code>
+</div>
+
+</div></body></html>
