@@ -33,6 +33,16 @@ jobs:
       - name: Прогон наблюдателя
         run: python watch_cbr.py --state state.json --report docs/index.html
 
+      - name: Выложить отчёт артефактом
+        # Pages не работает на приватном репозитории при бесплатном плане,
+        # поэтому отчёт скачивается прямо со страницы прогона.
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: otchet
+          path: docs/index.html
+          retention-days: 30
+
       - name: Зафиксировать состояние
         run: |
           git config user.name  "cbr-monitor"
