@@ -15,6 +15,11 @@ name: Бот постановки задач из чата
 on:
   workflow_dispatch:
     inputs:
+      list_chats:
+        description: 'Показать список чатов с номерами и выйти'
+        type: boolean
+        required: false
+        default: false
       dry_run:
         description: 'Сухой прогон: показать, но задач не создавать'
         type: boolean
@@ -50,6 +55,12 @@ jobs:
           B24_ALLOWED_AUTHORS: ${{ vars.B24_ALLOWED_AUTHORS }}
           B24_COMMAND_PREFIX: ${{ vars.B24_COMMAND_PREFIX }}
         run: |
+          # Режим «показать чаты» нужен один раз, чтобы узнать B24_CHAT_ID.
+          if [ "${{ inputs.list_chats }}" = "true" ]; then
+            echo "СПИСОК ЧАТОВ: ничего не читаем и не создаём"
+            python chat_watch.py --list-chats
+            exit 0
+          fi
           # По расписанию бот работает по-настоящему, вручную — по умолчанию
           # сухим прогоном, чтобы первый запуск ничего не создал.
           FLAG=""

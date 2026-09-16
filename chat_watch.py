@@ -68,8 +68,55 @@ def parse_command(text: str, prefixes: list[str]) -> tuple[str, str] | None:
     return None
 
 
+def list_chats(webhook: str) -> int:
+    """Показывает доступные диалоги с их идентификаторами.
+
+    Адресную строку смотреть неудобно, а в десктопном приложении её вовсе нет.
+    Пусть портал сам скажет, как называются чаты и какие у них номера."""
+    try:
+        res = call(webhook, "im.recent.get", {"SKIP_OPENLINES": "Y"})
+    except Exception as exc:  # noqa: BLE001
+        print(f"ОТКАЗ: не удалось получить список диалогов — {exc}")
+        print("Проверьте, что у вебхука есть право im.")
+        return 1
+
+    items = (res.get("result") or {}).get("items") or res.get("result") or []
+    if isinstance(items, dict):
+        items = items.get("items", [])
+
+    print(f"{'ИДЕНТИФИКАТОР':<18} {'ТИП':<10} НАЗВАНИЕ")
+    print("-" * 78)
+    shown = 0
+    for it in items:
+        dialog = it.get("id") or (it.get("chat") or {}).get("id") or ""
+        title = (it.get("title") or (it.get("chat") or {}).get("name")
+                 or (it.get("user") or {}).get("name") or "")
+        kind = it.get("type") or ""
+        if not dialog:
+            continue
+        print(f"{str(dialog):<18} {str(kind):<10} {title}")
+        shown += 1
+
+    print("-" * 78)
+    print(f"всего диалогов: {shown}")
+    print()
+    print("Возьмите идентификатор нужного чата (вида chat1234 или sg17)")
+    print("и задайте его переменной B24_CHAT_ID.")
+    print()
+    print("Если нужного чата в списке НЕТ — сотрудник, от имени которого создан")
+    print("вебхук, не состоит в этом чате. Добавьте его участником.")
+    return 0
+
+
 def run(args) -> int:
     webhook = config.get("B24_WEBHOOK", secrets_path=args.secrets)
+
+    if args.list_chats:
+        if not webhook:
+            print("Не задан B24_WEBHOOK — список получать нечем.")
+            return 1
+        return list_chats(webhook)
+
     chat_id = config.get("B24_CHAT_ID", secrets_path=args.secrets)
     responsible = config.get("B24_RESPONSIBLE_ID", secrets_path=args.secrets)
     allow_raw = config.get("B24_ALLOWED_AUTHORS", secrets_path=args.secrets)
@@ -177,6 +224,8 @@ def main() -> int:
                    help="путь к файлу секретов (по умолчанию secrets.txt рядом со скриптом)")
     p.add_argument("--dry-run", action="store_true",
                    help="разобрать команды и показать, но задач не создавать")
+    p.add_argument("--list-chats", action="store_true",
+                   help="показать доступные чаты с их идентификаторами и выйти")
     return run(p.parse_args())
 
 
