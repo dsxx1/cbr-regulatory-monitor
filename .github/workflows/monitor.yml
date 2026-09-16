@@ -31,7 +31,20 @@ jobs:
           python-version: '3.12'
 
       - name: Прогон наблюдателя
-        run: python watch_cbr.py --state state.json --report docs/index.html
+        env:
+          # Секреты задаются в Settings → Secrets and variables → Actions.
+          # Пока их нет — прогон работает в режиме «тень»: только обнаружение.
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_BASE_URL: ${{ vars.LLM_BASE_URL }}
+          LLM_MODEL: ${{ vars.LLM_MODEL }}
+          LLM_MAX_CALLS_PER_RUN: ${{ vars.LLM_MAX_CALLS_PER_RUN }}
+          B24_WEBHOOK: ${{ secrets.B24_WEBHOOK }}
+          B24_CHAT_ID: ${{ vars.B24_CHAT_ID }}
+          B24_RESPONSIBLE_ID: ${{ vars.B24_RESPONSIBLE_ID }}
+        # Флаг --send намеренно НЕ передаётся. Даже при заданном B24_WEBHOOK
+        # ничего наружу не уходит: очередь заполняется и показывается в отчёте.
+        # Включение отправки — отдельное решение владельца процесса.
+        run: python watch_cbr.py --state state.json --report docs/index.html --outbox outbox.json
 
       - name: Выложить отчёт артефактом
         # Pages не работает на приватном репозитории при бесплатном плане,
@@ -47,7 +60,7 @@ jobs:
         run: |
           git config user.name  "cbr-monitor"
           git config user.email "cbr-monitor@users.noreply.github.com"
-          git add state.json docs/index.html
+          git add state.json docs/index.html outbox.json
           if git diff --staged --quiet; then
             echo "Состояние не изменилось — коммит не нужен."
           else
