@@ -1,3 +1,10 @@
-﻿__pycache__/
+__pycache__/
 *.pyc
 
+# Файл секретов: вебхук Битрикс24 и ключ модели. В репозиторий не попадает.
+secrets.txt
+secrets*.txt
+!secrets.txt.example
+
+# Локальное состояние бота
+chat-state.json

@@ -20,11 +20,12 @@ from __future__ import annotations
 
 import hashlib
 import json
-import os
 import time
 import urllib.parse
 import urllib.request
 from pathlib import Path
+
+import config
 
 RATE_LIMIT_PAUSE = 0.6   # Битрикс24 устойчиво держит ~2 запроса в секунду
 
@@ -69,9 +70,9 @@ def build_message(card: dict) -> str:
 class Outbox:
     def __init__(self, path: str | Path, *, send: bool = False) -> None:
         self.path = Path(path)
-        self.webhook = os.environ.get("B24_WEBHOOK", "").strip().rstrip("/")
-        self.chat_id = os.environ.get("B24_CHAT_ID", "").strip()
-        self.responsible = os.environ.get("B24_RESPONSIBLE_ID", "").strip()
+        self.webhook = config.get("B24_WEBHOOK").rstrip("/")
+        self.chat_id = config.get("B24_CHAT_ID")
+        self.responsible = config.get("B24_RESPONSIBLE_ID")
         self.send_enabled = bool(send and self.webhook)
         self.entries: list[dict] = []
         if self.path.exists():

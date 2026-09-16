@@ -1,0 +1,70 @@
+name: Бот постановки задач из чата
+
+on:
+  schedule:
+    # Раз в час по рабочим дням, 07:00-19:00 МСК (04:00-16:00 UTC).
+    # Чаще нельзя: приватный репозиторий даёт 2000 минут в месяц, и каждый
+    # запуск округляется вверх до минуты. Опрос каждые 15 минут это ~2900
+    # минут и выход за лимит. Подробности в КЛЮЧИ-И-БОТ.md.
+    - cron: '0 4-16 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Сухой прогон: показать, но задач не создавать'
+        type: boolean
+        required: false
+        default: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cbr-chat-bot
+  cancel-in-progress: false   # курсор нельзя портить параллельным прогоном
+
+jobs:
+  bot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Забрать репозиторий
+        uses: actions/checkout@v7
+
+      - name: Поставить Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+
+      - name: Прочитать чат
+        env:
+          B24_WEBHOOK: ${{ secrets.B24_WEBHOOK }}
+          B24_CHAT_ID: ${{ vars.B24_CHAT_ID }}
+          B24_RESPONSIBLE_ID: ${{ vars.B24_RESPONSIBLE_ID }}
+          B24_ALLOWED_AUTHORS: ${{ vars.B24_ALLOWED_AUTHORS }}
+          B24_COMMAND_PREFIX: ${{ vars.B24_COMMAND_PREFIX }}
+        run: |
+          # По расписанию бот работает по-настоящему, вручную — по умолчанию
+          # сухим прогоном, чтобы первый запуск ничего не создал.
+          FLAG=""
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            FLAG="--dry-run"
+            echo "СУХОЙ ПРОГОН: задачи создаваться не будут"
+          fi
+          python chat_watch.py --state chat-state.json $FLAG
+
+      - name: Сохранить курсор
+        if: always()
+        run: |
+          git config user.name  "cbr-monitor"
+          git config user.email "cbr-monitor@users.noreply.github.com"
+          # chat-state.json закрыт .gitignore для локальной работы,
+          # но в облаке курсор жить больше негде — добавляем принудительно.
+          git add -f chat-state.json 2>/dev/null || true
+          if git diff --staged --quiet; then
+            echo "Курсор не сдвинулся."
+          else
+            git commit -m "Бот: курсор чата $(date -u +'%Y-%m-%d %H:%M UTC')"
+            git pull --rebase --autostash
+            git push
+          fi

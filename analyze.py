@@ -20,26 +20,19 @@
 from __future__ import annotations
 
 import json
-import os
 import re
 import urllib.request
+
+import config
 
 WS_RE = re.compile(r"\s+")
 
 
-def env_str(name: str, default: str) -> str:
-    """GitHub Actions подставляет НЕзаданный секрет как пустую строку, а не как
-    отсутствующую переменную. Поэтому os.environ.get(name, default) возвращает ""
-    и значение по умолчанию не срабатывает. Пустое считаем отсутствующим."""
-    value = os.environ.get(name, "").strip()
-    return value if value else default
-
-
-def env_int(name: str, default: int) -> int:
-    try:
-        return int(env_str(name, str(default)))
-    except ValueError:
-        return default
+# Значения берутся из файла secrets.txt, если он есть, иначе из окружения.
+# GitHub Actions подставляет НЕзаданный секрет пустой строкой, а не убирает
+# переменную, поэтому пустое значение везде считается отсутствующим.
+env_str = config.get
+env_int = config.get_int
 
 SYSTEM_PROMPT = """Ты — аналитик нормативных требований. Тебе дают текст документа
 регулятора. Твоя задача — извлечь из него требования и вернуть СТРОГО JSON.
