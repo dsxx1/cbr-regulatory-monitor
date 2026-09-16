@@ -82,6 +82,7 @@ class Analyzer:
         self.timeout = env_int("LLM_TIMEOUT", 120)
         self.calls = 0
         self.rejected_claims = 0
+        self.fallbacks = 0          # сколько раз пришлось отказаться от строгого JSON
         self.errors: list[str] = []
 
     @property
@@ -94,29 +95,60 @@ class Analyzer:
 
     # ----------------------------------------------------------- вызов
 
+    def _post(self, payload: dict) -> str:
+        req = urllib.request.Request(
+            f"{self.base_url}/chat/completions",
+            data=json.dumps(payload).encode("utf-8"),
+            headers={
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json",
+                # OpenRouter просит обозначать источник запроса.
+                "HTTP-Referer": "https://github.com/dsxx1/cbr-regulatory-monitor",
+                "X-Title": "regulatory-monitor",
+            },
+            method="POST",
+        )
+        with urllib.request.urlopen(req, timeout=self.timeout) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+        # Ошибка может приехать с кодом 200 в теле ответа.
+        if "error" in data and not data.get("choices"):
+            raise RuntimeError(str(data["error"])[:300])
+        return data["choices"][0]["message"]["content"]
+
+    @staticmethod
+    def _extract_json(raw: str) -> dict:
+        """Бесплатные модели любят обернуть ответ в ```json ... ``` или
+        дописать пояснение до и после. Вытаскиваем первый объект."""
+        text = (raw or "").strip()
+        fence = re.search(r"```(?:json)?\s*(.+?)```", text, re.S)
+        if fence:
+            text = fence.group(1).strip()
+        try:
+            return json.loads(text)
+        except json.JSONDecodeError:
+            pass
+        start, end = text.find("{"), text.rfind("}")
+        if start != -1 and end > start:
+            return json.loads(text[start:end + 1])
+        raise ValueError("в ответе модели нет разбираемого JSON")
+
     def _call(self, text: str) -> dict:
-        body = json.dumps({
+        base = {
             "model": self.model,
             "messages": [
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": f"<документ>\n{text}\n</документ>"},
             ],
             "temperature": 0,
-            "response_format": {"type": "json_object"},
-        }).encode("utf-8")
-
-        req = urllib.request.Request(
-            f"{self.base_url}/chat/completions",
-            data=body,
-            headers={
-                "Authorization": f"Bearer {self.api_key}",
-                "Content-Type": "application/json",
-            },
-            method="POST",
-        )
-        with urllib.request.urlopen(req, timeout=self.timeout) as resp:
-            payload = json.loads(resp.read().decode("utf-8"))
-        return json.loads(payload["choices"][0]["message"]["content"])
+        }
+        # Не все бесплатные модели поддерживают response_format. Пробуем строгий
+        # режим, при отказе повторяем без него и разбираем ответ терпимо.
+        try:
+            raw = self._post({**base, "response_format": {"type": "json_object"}})
+        except Exception:  # noqa: BLE001
+            self.fallbacks += 1
+            raw = self._post(base)
+        return self._extract_json(raw)
 
     # ----------------------------------------------------------- проверка
 
@@ -180,9 +212,11 @@ class Analyzer:
     def status_line(self) -> str:
         if not self.enabled:
             return "модель выключена (нет LLM_API_KEY) — работает только обнаружение"
-        parts = [f"вызовов: {self.calls}/{self.max_calls}"]
+        parts = [f"{self.model}, вызовов: {self.calls}/{self.max_calls}"]
         if self.rejected_claims:
             parts.append(f"отброшено утверждений без дословной опоры: {self.rejected_claims}")
+        if self.fallbacks:
+            parts.append(f"без строгого JSON: {self.fallbacks}")
         if self.errors:
-            parts.append(f"ошибок: {len(self.errors)}")
+            parts.append(f"ошибок: {len(self.errors)} ({self.errors[0][:120]})")
         return ", ".join(parts)
