@@ -1,0 +1,79 @@
+name: Сводка в Битрикс24
+
+on:
+  schedule:
+    # Понедельник, 09:00 МСК (06:00 UTC) — недельная сводка к началу недели.
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+    inputs:
+      years:
+        description: 'Глубина ретроспективы в годах'
+        required: false
+        default: '3'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cbr-digest
+  cancel-in-progress: false
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Забрать репозиторий
+        uses: actions/checkout@v7
+
+      - name: Поставить Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+
+      - name: Собрать сводку
+        env:
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_BASE_URL: ${{ vars.LLM_BASE_URL }}
+          LLM_MODEL: ${{ vars.LLM_MODEL }}
+          B24_WEBHOOK: ${{ secrets.B24_WEBHOOK }}
+          B24_CHAT_ID: ${{ vars.B24_CHAT_ID }}
+          B24_RESPONSIBLE_ID: ${{ vars.B24_RESPONSIBLE_ID }}
+        # Отправка включается переменной SEND_TO_B24=yes в Variables.
+        # Пока её нет — сводка только собирается и коммитится.
+        run: |
+          FLAG=""
+          if [ "${{ vars.SEND_TO_B24 }}" = "yes" ]; then
+            FLAG="--send"
+            echo "Отправка в Битрикс24 РАЗРЕШЕНА переменной SEND_TO_B24"
+          else
+            echo "Режим без отправки: SEND_TO_B24 не равно yes"
+          fi
+          python retrospective.py \
+            --years "${{ inputs.years || '3' }}" \
+            --report docs/retrospective.html \
+            --digest docs/digest.txt \
+            --outbox outbox-digest.json $FLAG
+
+      - name: Выложить сводку артефактом
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: svodka
+          path: |
+            docs/retrospective.html
+            docs/digest.txt
+          retention-days: 90
+
+      - name: Зафиксировать
+        run: |
+          git config user.name  "cbr-monitor"
+          git config user.email "cbr-monitor@users.noreply.github.com"
+          git add docs/retrospective.html docs/digest.txt outbox-digest.json
+          if git diff --staged --quiet; then
+            echo "Сводка не изменилась — коммит не нужен."
+          else
+            git commit -m "Сводка: $(date -u +'%Y-%m-%d %H:%M UTC')"
+            git push
+          fi
