@@ -80,9 +80,15 @@ def list_chats(webhook: str) -> int:
         print("Проверьте, что у вебхука есть право im.")
         return 1
 
-    items = (res.get("result") or {}).get("items") or res.get("result") or []
-    if isinstance(items, dict):
-        items = items.get("items", [])
+    # im.recent.get отдаёт result списком напрямую, но в части версий —
+    # объектом с полем items. Принимаем оба вида.
+    result = res.get("result")
+    if isinstance(result, dict):
+        items = result.get("items") or []
+    elif isinstance(result, list):
+        items = result
+    else:
+        items = []
 
     print(f"{'ИДЕНТИФИКАТОР':<18} {'ТИП':<10} НАЗВАНИЕ")
     print("-" * 78)

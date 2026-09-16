@@ -21,9 +21,20 @@ from __future__ import annotations
 
 import json
 import re
+import time
+import urllib.error
 import urllib.request
 
 import config
+
+
+class ApiError(RuntimeError):
+    """Отказ API с кодом. Код нужен, чтобы отличить нехватку квоты (429)
+    от непонятого параметра (400/422) — лечатся они по-разному."""
+
+    def __init__(self, status: int, message: str) -> None:
+        super().__init__(message)
+        self.status = status
 
 WS_RE = re.compile(r"\s+")
 
@@ -80,9 +91,14 @@ class Analyzer:
         self.model = env_str("LLM_MODEL", "deepseek-chat")
         self.max_calls = env_int("LLM_MAX_CALLS_PER_RUN", 10)
         self.timeout = env_int("LLM_TIMEOUT", 120)
+        # Бесплатный тариф OpenRouter — 20 запросов в минуту. 4 секунды между
+        # обращениями дают 15 в минуту, с запасом.
+        self.min_interval = float(env_int("LLM_MIN_INTERVAL_SEC", 4))
+        self._last_call_at: float | None = None
         self.calls = 0
         self.rejected_claims = 0
         self.fallbacks = 0          # сколько раз пришлось отказаться от строгого JSON
+        self.throttled = 0          # сколько раз упёрлись в частоту и ждали
         self.errors: list[str] = []
 
     @property
@@ -95,7 +111,17 @@ class Analyzer:
 
     # ----------------------------------------------------------- вызов
 
+    def _pace(self) -> None:
+        """Бесплатный тариф OpenRouter — 20 запросов в минуту. Выдерживаем
+        паузу между обращениями, иначе прилетает 429 и прогон впустую."""
+        if self._last_call_at is not None:
+            wait = self.min_interval - (time.monotonic() - self._last_call_at)
+            if wait > 0:
+                time.sleep(wait)
+        self._last_call_at = time.monotonic()
+
     def _post(self, payload: dict) -> str:
+        self._pace()
         req = urllib.request.Request(
             f"{self.base_url}/chat/completions",
             data=json.dumps(payload).encode("utf-8"),
@@ -108,11 +134,16 @@ class Analyzer:
             },
             method="POST",
         )
-        with urllib.request.urlopen(req, timeout=self.timeout) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
+        try:
+            with urllib.request.urlopen(req, timeout=self.timeout) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+        except urllib.error.HTTPError as exc:
+            raise ApiError(exc.code, f"HTTP {exc.code}") from exc
         # Ошибка может приехать с кодом 200 в теле ответа.
         if "error" in data and not data.get("choices"):
-            raise RuntimeError(str(data["error"])[:300])
+            err = data["error"]
+            code = err.get("code") if isinstance(err, dict) else None
+            raise ApiError(code if isinstance(code, int) else 0, str(err)[:300])
         return data["choices"][0]["message"]["content"]
 
     @staticmethod
@@ -141,14 +172,37 @@ class Analyzer:
             ],
             "temperature": 0,
         }
-        # Не все бесплатные модели поддерживают response_format. Пробуем строгий
-        # режим, при отказе повторяем без него и разбираем ответ терпимо.
-        try:
-            raw = self._post({**base, "response_format": {"type": "json_object"}})
-        except Exception:  # noqa: BLE001
-            self.fallbacks += 1
-            raw = self._post(base)
-        return self._extract_json(raw)
+        # Два разных отказа требуют разного лечения, и путать их нельзя:
+        #   429 — упёрлись в частоту, надо подождать и повторить ТО ЖЕ САМОЕ;
+        #   400/422 — модель не понимает response_format, надо повторить БЕЗ него.
+        # Раньше на любой отказ шёл повтор без строгого JSON, и на 429 это
+        # удваивало нагрузку вместо паузы — прогон выжигал лимит вхолостую.
+        strict: dict = {**base, "response_format": {"type": "json_object"}}
+        payload = strict
+        for attempt in range(1, 5):
+            try:
+                return self._extract_json(self._post(payload))
+            except ApiError as exc:
+                if exc.status == 429:
+                    self.throttled += 1
+                    if attempt == 4:
+                        raise
+                    time.sleep(min(60, 8 * attempt))
+                    continue
+                if payload is strict and exc.status in (400, 404, 422):
+                    self.fallbacks += 1
+                    payload = base
+                    continue
+                raise
+            except ValueError:
+                # Ответ пришёл, но JSON из него не достаётся. Один шанс
+                # переспросить без строгого режима, дальше — отказ.
+                if payload is strict:
+                    self.fallbacks += 1
+                    payload = base
+                    continue
+                raise
+        raise RuntimeError("исчерпаны попытки обращения к модели")
 
     # ----------------------------------------------------------- проверка
 
@@ -217,6 +271,8 @@ class Analyzer:
             parts.append(f"отброшено утверждений без дословной опоры: {self.rejected_claims}")
         if self.fallbacks:
             parts.append(f"без строгого JSON: {self.fallbacks}")
+        if self.throttled:
+            parts.append(f"пауз по частоте: {self.throttled}")
         if self.errors:
             parts.append(f"ошибок: {len(self.errors)} ({self.errors[0][:120]})")
         return ", ".join(parts)

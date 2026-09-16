@@ -10,6 +10,11 @@ on:
         description: 'Глубина ретроспективы в годах'
         required: false
         default: '3'
+      send_once:
+        description: 'Отправить в чат ОДИН раз (постоянную рассылку не включает)'
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: write
@@ -46,9 +51,12 @@ jobs:
           FLAG=""
           if [ "${{ vars.SEND_TO_B24 }}" = "yes" ]; then
             FLAG="--send"
-            echo "Отправка в Битрикс24 РАЗРЕШЕНА переменной SEND_TO_B24"
+            echo "Отправка РАЗРЕШЕНА постоянно: SEND_TO_B24=yes"
+          elif [ "${{ inputs.send_once }}" = "true" ]; then
+            FLAG="--send"
+            echo "Отправка РАЗРЕШЕНА разово кнопкой. Постоянная рассылка не включена."
           else
-            echo "Режим без отправки: SEND_TO_B24 не равно yes"
+            echo "Режим без отправки."
           fi
           python retrospective.py \
             --years "${{ inputs.years || '3' }}" \
