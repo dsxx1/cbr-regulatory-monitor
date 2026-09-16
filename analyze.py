@@ -26,6 +26,21 @@ import urllib.request
 
 WS_RE = re.compile(r"\s+")
 
+
+def env_str(name: str, default: str) -> str:
+    """GitHub Actions подставляет НЕзаданный секрет как пустую строку, а не как
+    отсутствующую переменную. Поэтому os.environ.get(name, default) возвращает ""
+    и значение по умолчанию не срабатывает. Пустое считаем отсутствующим."""
+    value = os.environ.get(name, "").strip()
+    return value if value else default
+
+
+def env_int(name: str, default: int) -> int:
+    try:
+        return int(env_str(name, str(default)))
+    except ValueError:
+        return default
+
 SYSTEM_PROMPT = """Ты — аналитик нормативных требований. Тебе дают текст документа
 регулятора. Твоя задача — извлечь из него требования и вернуть СТРОГО JSON.
 
@@ -67,11 +82,11 @@ class Analyzer:
     модели недопустимо."""
 
     def __init__(self) -> None:
-        self.api_key = os.environ.get("LLM_API_KEY", "").strip()
-        self.base_url = os.environ.get("LLM_BASE_URL", "https://api.deepseek.com").rstrip("/")
-        self.model = os.environ.get("LLM_MODEL", "deepseek-chat")
-        self.max_calls = int(os.environ.get("LLM_MAX_CALLS_PER_RUN", "10"))
-        self.timeout = int(os.environ.get("LLM_TIMEOUT", "120"))
+        self.api_key = env_str("LLM_API_KEY", "")
+        self.base_url = env_str("LLM_BASE_URL", "https://api.deepseek.com").rstrip("/")
+        self.model = env_str("LLM_MODEL", "deepseek-chat")
+        self.max_calls = env_int("LLM_MAX_CALLS_PER_RUN", 10)
+        self.timeout = env_int("LLM_TIMEOUT", 120)
         self.calls = 0
         self.rejected_claims = 0
         self.errors: list[str] = []
