@@ -73,6 +73,39 @@ PERIMETER_EXCLUDE = [
 ]
 
 
+# Собственный рубрикатор правовых актов Банка России: /na/?la.TagId=N
+#
+# Это главный источник. Разъяснения — FAQ по заполнению форм, ленты — новости;
+# настоящие указания, положения и информационные письма лежат здесь, и регулятор
+# сам проставляет им тему. Никаких ключевых слов и ложных друзей вроде
+# «Ломбардного списка» или зданий-памятников с названием «Ломбард».
+#
+# Проверено 17.09.2026: тема 15 — 54 документа, 22 — 215, 209 — 47, 168 — 187.
+NA_URL = "https://www.cbr.ru/na/"
+NA_TOPICS = [
+    (15, "Ломбарды"),
+    (209, "Некредитные финансовые организации"),
+    (168, "Бухгалтерский учет и отчетность в НФО"),
+]
+# Темы, которые можно добавить при расширении периметра:
+#   22 — Микрофинансирование (215 документов, шире нашего)
+#   53 — Защита прав потребителей финансовых услуг
+#   193 — Противодействие отмыванию денег
+#   177 — Потребительское кредитование
+
+# Постраничная выдача. Обычная страница отдаёт первые 10; остальное —
+# через тот же адрес, каким пользуется кнопка «Загрузить еще».
+NA_PAGE_URL = "https://www.cbr.ru/Crosscut/LawActs/Page/94917"
+NA_PAGE_LIMIT = 20          # предохранитель: 20 страниц это 200 документов
+
+NA_SPLIT_RE = re.compile(r'<div class="cross-result[^"]*"\s+data-doc-id="(\d+)"')
+NA_NUMBER_RE = re.compile(r'<span class="number[^"]*">(.*?)</span>', re.S)
+NA_DATE_RE = re.compile(r'<span class="date[^"]*">(.*?)</span>', re.S)
+NA_SOURCE_RE = re.compile(r'<div class="source">(.*?)</div>', re.S)
+NA_ZOOM_RE = re.compile(r'data-zoom-title="([^"]*)"')
+NA_HREF_RE = re.compile(r'href="([^"]+)"')
+
+
 @dataclass
 class Document:
     """Единый вид записи независимо от источника."""
@@ -225,6 +258,71 @@ def fetch_rss(source: str, source_title: str, url: str, timeout: int = 30) -> li
     return parse_rss(_fetch(url, timeout), source, source_title)
 
 
+def _parse_acts_page(html_text: str, tag_id: int, tag_name: str) -> list[Document]:
+    """Разбор одной страницы выдачи. Блоки режем по data-doc-id, поля тянем
+    внутри блока — одним большим выражением получалось хрупко."""
+    docs: list[Document] = []
+    marks = list(NA_SPLIT_RE.finditer(html_text))
+
+    for i, mark in enumerate(marks):
+        start = mark.end()
+        end = marks[i + 1].start() if i + 1 < len(marks) else len(html_text)
+        block = html_text[start:end]
+        doc_id = mark.group(1)
+
+        def first(rx: re.Pattern, default: str = "") -> str:
+            m = rx.search(block)
+            return normalize_text(m.group(1)) if m else default
+
+        number = first(NA_NUMBER_RE).lstrip("№").strip()
+        date = first(NA_DATE_RE).replace("от ", "").strip()
+        kind = first(NA_SOURCE_RE)
+        # data-zoom-title несёт канонический заголовок целиком — с типом,
+        # номером, датой и названием. Он полнее видимого текста ссылки,
+        # который обрезается вёрсткой.
+        title = first(NA_ZOOM_RE)
+        href_m = NA_HREF_RE.search(block)
+        href = href_m.group(1) if href_m else ""
+        url = href if href.startswith("http") else f"https://www.cbr.ru{href}"
+
+        docs.append(Document(
+            key=f"na:{doc_id}",
+            source="cbr-na",
+            source_title=f"Правовые акты ЦБ: {tag_name}",
+            external_id=doc_id,
+            title=title or f"{kind} № {number} от {date}".strip(),
+            body=f"{kind} № {number} от {date}".strip(),
+            url=url,
+            published=date,
+            category=f"{tag_name} / {kind}",
+            # Тему проставил сам регулятор — это и есть периметр, без догадок.
+            in_perimeter=True,
+        ))
+    return docs
+
+
+def fetch_legal_acts(tag_id: int, tag_name: str, timeout: int = 30,
+                     max_pages: int = NA_PAGE_LIMIT) -> list[Document]:
+    """Правовые акты Банка России по теме его собственного рубрикатора.
+
+    Выдача постраничная по 10 записей, отсортирована по убыванию даты."""
+    docs: list[Document] = []
+    seen: set[str] = set()
+
+    for page in range(max_pages):
+        url = f"{NA_PAGE_URL}?TagId={tag_id}&Date.Time=Any&Page={page}"
+        chunk = _parse_acts_page(
+            _fetch(url, timeout).decode("utf-8", errors="replace"), tag_id, tag_name)
+        fresh = [d for d in chunk if d.key not in seen]
+        if not fresh:
+            break                      # страницы кончились или пошли повторы
+        seen.update(d.key for d in fresh)
+        docs.extend(fresh)
+        if len(chunk) < 10:
+            break                      # неполная страница — она последняя
+    return docs
+
+
 def extract_comment_deadline(category: str) -> str:
     """У проектов НПА срок приёма замечаний лежит прямо в category:
     «Департамент страхового рынка (по 16.10.2026)».
@@ -262,6 +360,17 @@ def collect(*, categories: list[int], root: int, timeout: int,
                         "detail": f"записей: {len(docs)}"})
         except Exception as exc:  # noqa: BLE001
             log.append({"name": f"Разъяснения, категория {cat}", "status": "ошибка",
+                        "detail": str(exc)})
+
+    # Главный источник: правовые акты по темам рубрикатора ЦБ.
+    for tag_id, tag_name in NA_TOPICS:
+        try:
+            docs = fetch_legal_acts(tag_id, tag_name, timeout)
+            documents.extend(docs)
+            log.append({"name": f"Правовые акты ЦБ: {tag_name}", "status": "ok",
+                        "detail": f"документов: {len(docs)}"})
+        except Exception as exc:  # noqa: BLE001
+            log.append({"name": f"Правовые акты ЦБ: {tag_name}", "status": "ошибка",
                         "detail": str(exc)})
 
     for source, title, url in feeds:
