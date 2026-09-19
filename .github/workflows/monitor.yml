@@ -41,10 +41,15 @@ jobs:
           B24_WEBHOOK: ${{ secrets.B24_WEBHOOK }}
           B24_CHAT_ID: ${{ vars.B24_CHAT_ID }}
           B24_RESPONSIBLE_ID: ${{ vars.B24_RESPONSIBLE_ID }}
+          MONITOR_GATEWAY_URL: ${{ vars.MONITOR_GATEWAY_URL }}
+          MONITOR_SHARED_SECRET: ${{ secrets.MONITOR_SHARED_SECRET }}
         # Флаг --send намеренно НЕ передаётся. Даже при заданном B24_WEBHOOK
         # ничего наружу не уходит: очередь заполняется и показывается в отчёте.
         # Включение отправки — отдельное решение владельца процесса.
-        run: python watch_cbr.py --state state.json --report docs/index.html --outbox outbox.json
+        run: |
+          FLAG=""
+          if [ "${{ vars.SEND_TO_BOT }}" = "yes" ]; then FLAG="--send"; fi
+          python watch_cbr.py --state state.json --report docs/index.html --outbox outbox.json $FLAG
 
       - name: Выложить отчёт артефактом
         # Pages не работает на приватном репозитории при бесплатном плане,

@@ -1,0 +1,11 @@
+name = "cbr-regulatory-bot-gateway"
+main = "src/index.js"
+compatibility_date = "2026-09-20"
+
+[[kv_namespaces]]
+binding = "ALERTS"
+id = "SET_AFTER_CREATING_FREE_KV_NAMESPACE"
+
+# Secrets are operator supplied: MONITOR_SHARED_SECRET, B24_REST_URL,
+# B24_BOT_ID, B24_BOT_TOKEN, B24_DIALOG_ID. Create the free KV namespace first
+# and replace only its public id above. Never add secret values to this file.

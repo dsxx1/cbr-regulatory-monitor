@@ -30,6 +30,7 @@ from pathlib import Path
 
 import sources
 from analyze import Analyzer
+from alerting import classify_alert
 from b24 import Outbox
 
 RETENTION_DAYS = 180   # запись, не встречавшаяся полгода, уходит из состояния
@@ -251,13 +252,16 @@ def run(args) -> int:
         else:
             prev["lastSeen"] = run_at.isoformat()
 
-    # Анализ — только для периметра и только в пределах бюджета вызовов.
-    # Всё остальное сохранено и попадёт в лист отсева, но денег не стоит.
+    # Бесплатный прозрачный отбор работает всегда. Модель, если настроена,
+    # только добавляет пояснение и не является условием уведомления.
     for card in new_cards + changed_cards:
+        selection = classify_alert(card, "new" if card in new_cards else "changed")
+        if selection:
+            card["level"] = "срочно" if selection["level"] == "urgent" else "внимание"
+            card["alert_reason"] = selection["reason"]
+            outbox.enqueue(card)
         if card["in_perimeter"]:
             card["analysis"] = analyzer.analyze(f"{card['title']}\n{card['body']}")
-            if card.get("analysis"):
-                outbox.enqueue(card)
 
     outbox.flush()
     outbox.save()

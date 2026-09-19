@@ -19,6 +19,7 @@
 from __future__ import annotations
 
 import hashlib
+import hmac
 import json
 import time
 import urllib.parse
@@ -71,9 +72,11 @@ class Outbox:
     def __init__(self, path: str | Path, *, send: bool = False) -> None:
         self.path = Path(path)
         self.webhook = config.get("B24_WEBHOOK").rstrip("/")
+        self.gateway_url = config.get("MONITOR_GATEWAY_URL").rstrip("/")
+        self.gateway_secret = config.get("MONITOR_SHARED_SECRET")
         self.chat_id = config.get("B24_CHAT_ID")
         self.responsible = config.get("B24_RESPONSIBLE_ID")
-        self.send_enabled = bool(send and self.webhook)
+        self.send_enabled = bool(send and ((self.gateway_url and self.gateway_secret) or self.webhook))
         self.entries: list[dict] = []
         if self.path.exists():
             try:
@@ -100,6 +103,9 @@ class Outbox:
             "card": card["key"],
             "action": action,
             "title": card.get("title", "")[:300],
+            "url": card.get("url", "")[:1000],
+            "source": card.get("source_title", "")[:200],
+            "level": card.get("level", "внимание"),
             "text": build_message({**card, "key_id": key}),
             "created": card.get("detected", ""),
             "external_id": None,
@@ -135,6 +141,25 @@ class Outbox:
         except Exception:  # noqa: BLE001
             return None
 
+    def _send_gateway(self, entry: dict) -> str:
+        """Отправка через Worker: токен чат-бота остаётся только в Cloudflare."""
+        payload = json.dumps({
+            "idempotency_key": entry["key"], "title": entry["title"],
+            "url": entry.get("url", "https://www.cbr.ru/"),
+            "source": entry.get("source", "Мониторинг регулирования"),
+            "level": entry.get("level", "important"),
+        }, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+        signature = hmac.new(self.gateway_secret.encode("utf-8"), payload, hashlib.sha256).hexdigest()
+        req = urllib.request.Request(f"{self.gateway_url}/alert", data=payload, method="POST",
+            headers={"Content-Type": "application/json", "X-Monitor-Signature": signature})
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            if resp.status not in (202, 208):
+                raise RuntimeError(f"шлюз вернул HTTP {resp.status}")
+            result = json.loads(resp.read().decode("utf-8"))
+        if not result.get("accepted"):
+            raise RuntimeError("шлюз не подтвердил доставку")
+        return str(result.get("external_id") or entry["key"])
+
     def flush(self) -> None:
         """Отправляет только то, что ещё не имеет внешнего id."""
         if not self.send_enabled:
@@ -143,6 +168,11 @@ class Outbox:
             if entry.get("external_id"):
                 continue
             try:
+                if self.gateway_url and self.gateway_secret:
+                    entry["external_id"] = self._send_gateway(entry)
+                    entry["status"] = "отправлено ботом через шлюз"
+                    self.sent += 1
+                    continue
                 existing = self._already_there(entry["key"])
                 if existing:
                     entry["external_id"] = existing
@@ -177,8 +207,8 @@ class Outbox:
 
     def status_line(self) -> str:
         pending = sum(1 for e in self.entries if not e.get("external_id"))
-        if not self.webhook:
-            return f"Б24 не настроен (нет B24_WEBHOOK) — в очереди {pending}, ничего не отправлено"
+        if not self.webhook and not self.gateway_url:
+            return f"Б24 не настроен (нет шлюза или B24_WEBHOOK) — в очереди {pending}, ничего не отправлено"
         if not self.send_enabled:
             return f"режим без отправки — в очереди {pending}, для отправки нужен флаг --send"
         line = f"отправлено: {self.sent}, осталось в очереди: {pending}"
