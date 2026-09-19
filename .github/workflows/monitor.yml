@@ -30,17 +30,15 @@ jobs:
         with:
           python-version: '3.12'
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
       - name: Прогон наблюдателя
         env:
           # Секреты задаются в Settings → Secrets and variables → Actions.
           # Пока их нет — прогон работает в режиме «тень»: только обнаружение.
-          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
-          LLM_BASE_URL: ${{ vars.LLM_BASE_URL }}
-          LLM_MODEL: ${{ vars.LLM_MODEL }}
           LLM_MAX_CALLS_PER_RUN: ${{ vars.LLM_MAX_CALLS_PER_RUN }}
-          B24_WEBHOOK: ${{ secrets.B24_WEBHOOK }}
-          B24_CHAT_ID: ${{ vars.B24_CHAT_ID }}
-          B24_RESPONSIBLE_ID: ${{ vars.B24_RESPONSIBLE_ID }}
           MONITOR_GATEWAY_URL: ${{ vars.MONITOR_GATEWAY_URL }}
           MONITOR_SHARED_SECRET: ${{ secrets.MONITOR_SHARED_SECRET }}
         # Флаг --send намеренно НЕ передаётся. Даже при заданном B24_WEBHOOK

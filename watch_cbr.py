@@ -29,7 +29,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import sources
-from analyze import Analyzer
+from free_llm import FreeAnalyzer
 from alerting import classify_alert
 from b24 import Outbox
 
@@ -216,7 +216,7 @@ def run(args) -> int:
     known_subs = [int(s) for s in state.get("subCategories", [])]
     new_subs = [] if first_run else [s for s in subs_now if s not in known_subs]
 
-    analyzer = Analyzer()
+    analyzer = FreeAnalyzer(max_calls=max(0, int(os.environ.get('LLM_MAX_CALLS_PER_RUN') or '3')))
     outbox = Outbox(args.outbox, send=args.send)
 
     new_cards: list[dict] = []
