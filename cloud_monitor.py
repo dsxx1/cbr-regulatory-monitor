@@ -82,6 +82,8 @@ def main():
         approved = False
         if quality(analysis,text):
             try:
+                if reviewer.budget_left <= 0:
+                    raise RuntimeError('Free review budget exhausted')
                 reviewer.calls += 1
                 review = reviewer._call(json.dumps({'source':text,'summary':analysis},ensure_ascii=False))
                 approved = isinstance(review,dict) and review.get('approved') is True and review.get('issues') == []
