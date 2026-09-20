@@ -12,8 +12,8 @@ ENDPOINT = 'https://api.kilo.ai/api/gateway/v1/chat/completions'
 MODEL = 'kilo-auto/free'
 
 
-def verify_price(catalog):
-    model = next((m for m in catalog.get('data', []) if m.get('id') == MODEL), None)
+def verify_price(catalog, model_id=MODEL):
+    model = next((m for m in catalog.get('data', []) if m.get('id') == model_id), None)
     if not model:
         raise ValueError('Free model absent from live catalog')
     pricing = model.get('pricing', {})
@@ -38,7 +38,7 @@ class FreeAnalyzer(Analyzer):
         return True
 
     def _call(self, text):
-        payload = {'model': MODEL, 'messages': [
+        payload = {'model': self.model, 'messages': [
             {'role': 'system', 'content': getattr(self, 'system_prompt', SYSTEM_PROMPT)},
             {'role': 'user', 'content': '<document>\n' + text[:18000] + '\n</document>'}],
             'max_tokens': 6000, 'temperature': 0, 'usage': {'include': True}}
@@ -48,7 +48,7 @@ class FreeAnalyzer(Analyzer):
             raise RuntimeError(completed.stderr[:250])
         envelope = json.loads(completed.stdout)
         result, pricing = envelope['result'], envelope['pricing']
-        verify_price({'data': [{'id': MODEL, 'pricing': pricing}]})
+        verify_price({'data': [{'id': self.model, 'pricing': pricing}]}, self.model)
         self.receipts.append({'model': result.get('model'), 'pricing': pricing,
                               'usage': result.get('usage', {})})
         cost = result.get('usage', {}).get('cost')
