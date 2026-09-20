@@ -31,6 +31,7 @@ class FreeAnalyzer(Analyzer):
         self.errors = []
         self.receipts = []
         self.timeout = 90
+        self.system_prompt = SYSTEM_PROMPT + '\nВерни не больше трёх требований. Пиши кратко; суммарный ответ до 2000 символов. Не выдавай рассуждения вне JSON.'
 
     @property
     def enabled(self):

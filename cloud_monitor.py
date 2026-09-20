@@ -40,6 +40,12 @@ def main():
         source_log.append({'name':item['source'],'status':'ok' if 'count' in item else 'ошибка',
                            'detail':f"Материалов в окне: {item.get('count',0)}; {item['stop']}"})
     control = os.environ.get('CONTROL_RUN') == 'yes'
+    if state.get('quality_version') != 2:
+        # First cloud pilot was never delivered (confirmed insufficient_scope).
+        # Only reviewed cards may enter the new outgoing queue.
+        state['pending_message'] = ''
+        state['cards'] = []
+        state['quality_version'] = 2
     baseline = not state['seen']
     for doc in documents:
         fingerprint = hashlib.sha256(doc.payload().encode()).hexdigest()
@@ -117,6 +123,9 @@ def main():
     page += f'<p>Последний запуск: {e(now)} UTC</p><p>Публикаций: {len(documents)} · Ответов LLM проверено: {len(accepted)}/{analyzer.calls} · В очереди: {len(state["queue"])}</p><p>GitHub Actions · бесплатная модель · проверка цитат. Это вспомогательный анализ, не юридическое заключение.</p></header>'
     for entry in source_log:
         page += '<p>'+e(entry['name'])+': '+e(entry['status'])+'</p>'
+    page += '<p>Второй проход LLM: '+str(reviewer.calls)+' проверок. Отклонено или недоступно: '+str(len(rejected))+'.</p>'
+    if analyzer.errors or reviewer.errors:
+        page += '<p>Ошибки модели: '+e('; '.join(analyzer.errors+reviewer.errors))+'</p>'
     for card in reversed(state['cards']):
         page += '<article><small>'+('Контрольный пример из архива' if card['control'] else 'Обнаруженное изменение')+'</small><h2>'+e(card['title'])+'</h2><a href="'+e(card['url'],quote=True)+'">Первоисточник</a>'
         for req in card['analysis']['requirements'][:5]:
