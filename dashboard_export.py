@@ -97,7 +97,9 @@ def export():
         if re.search(r':[0-9a-f]{64}$',original_key):
             original_key = original_key.rsplit(':',1)[0]
         original = next((item for item in catalog if item['key']==original_key),{})
-        merged = {**original,**doc,'source_title':doc.get('source') or original.get('source_title','')}
+        # The content fingerprint identifies a queue attempt, not a new publication.
+        key = key if key.startswith('control:') else original_key
+        merged = {**original,**doc,'key':key,'source_title':doc.get('source') or original.get('source_title','')}
         if original:
             merged['source'] = original.get('source','')
         cards[key] = project(merged,'verified')

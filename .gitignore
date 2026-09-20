@@ -8,3 +8,6 @@ secrets*.txt
 
 # Локальное состояние бота
 chat-state.json
+compose.override.yaml
+out/
+runtime/

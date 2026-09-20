@@ -71,9 +71,9 @@ def main():
     if args.check_delivery:
         methods=call('methods',{})
         if isinstance(methods,dict): methods=methods.get('methods',[])
-        if 'imbot.v2.bot.register' not in [str(m).lower() for m in methods]:
+        if not any(str(m).lower() in ('imbot.v2.bot.register','imbot.register') for m in methods):
             raise DeliveryBlocked('Мониторинг и сайт работают. Для отправки ботом нужно право «Чат-боты» (imbot).')
-        report_delivery('ready','Методы чат-бота доступны. Контрольная отправка ещё не выполнялась.')
+        report_delivery('ready','Право imbot доступно. Фактическую доставку подтверждает отправка и повторное чтение сообщения.')
         return
     if args.probe:
         methods = call('methods', {})
