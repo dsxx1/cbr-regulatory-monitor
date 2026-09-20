@@ -32,6 +32,7 @@ def main():
         return
     now = datetime.now(timezone.utc).isoformat()
     documents, source_log, _ = sources.collect(categories=sources.EXPLAIN_CATEGORIES,root=sources.EXPLAIN_ROOT,timeout=20)
+    print(f'CBR collection completed: {len(documents)} documents',flush=True)
     industry, industry_log = collect_industry(date.today()-timedelta(days=60), date.today())
     for item in industry:
         documents.append(sources.Document(key=item['key'],source=item['source'],source_title=item['source_title'],
@@ -72,6 +73,7 @@ def main():
     if control:
         candidates = [(k,d) for k,d in candidates if k.startswith('control:')]
     for key, doc in candidates[:3]:
+        print('Analyzing public document: '+key,flush=True)
         text = doc['title']+'\n'+doc['body']
         if len(doc['body']) < 120:
             state.setdefault('needs_full_text',{})[key] = doc
@@ -81,6 +83,7 @@ def main():
         analysis = analyzer.analyze(text)
         approved = False
         if quality(analysis,text):
+            print('Literal citations passed; starting independent review: '+key,flush=True)
             try:
                 if reviewer.budget_left <= 0:
                     raise RuntimeError('Free review budget exhausted')
