@@ -3,7 +3,8 @@ $Host.UI.RawUI.WindowTitle = 'Мониторинг регулятора — за
 Set-Location $PSScriptRoot
 $env:MONITOR_DATA = Join-Path $PSScriptRoot 'runtime\local-data'
 $env:B24_SECRET_FILE = Join-Path $PSScriptRoot 'secrets.txt'
-$env:MONITOR_BIND = '127.0.0.1'
+$env:MONITOR_BIND = '0.0.0.0'
+$env:MONITOR_OWNER_SID = [System.Security.Principal.WindowsIdentity]::GetCurrent().User.Value
 $env:MONITOR_PORT = '8787'
 $env:PYTHONUNBUFFERED = '1'
 $env:PYTHONIOENCODING = 'utf-8'

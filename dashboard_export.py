@@ -143,7 +143,7 @@ def export():
         card['markdownUrl']=filename
         card['markdownKind']='analysis' if card.get('brief') else 'source'
     Path('public/news.json').write_text(json.dumps(output,ensure_ascii=False,indent=2),encoding='utf-8')
-    for name in ('index.html','app.css','app.js','material.js','editorial.css','readable.css','operations.js'):
+    for name in ('index.html','app.css','app.js','material.js','editorial.css','readable.css','minimal.css','operations.js'):
         shutil.copyfile(Path('web')/name,Path('public')/name)
     print(f'Dashboard: {len(cards)} cards exported')
 

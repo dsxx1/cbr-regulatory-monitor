@@ -23,6 +23,7 @@ LOCK = threading.Lock()
 DELIVERY_LOCK = threading.Lock()
 CHILDREN = set()
 CHILD_LOCK = threading.Lock()
+AUTH = None
 
 
 def now():
@@ -50,8 +51,14 @@ def db():
 
 
 def init():
+    global AUTH
     setup_tls()
     DATA.mkdir(parents=True, exist_ok=True)
+    from admin_auth import OwnerAuth
+    AUTH = OwnerAuth(DATA)
+    sid = os.environ.get('MONITOR_OWNER_SID')
+    if os.name == 'nt' and sid:
+        subprocess.run(['icacls',str(AUTH.path),'/inheritance:r','/grant:r','*'+sid+':(F)','*S-1-5-18:(F)'],check=True,capture_output=True)
     for name in ('cloud-state.json', 'news-catalog.json', 'material-briefs.json', 'source-cache.json',
                  'analysis-queue.json', 'monitor-settings.json', 'llm-health.json'):
         if not (DATA / name).exists() and (APP / name).exists():
@@ -224,27 +231,66 @@ def create_task(card_id):
 class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs): super().__init__(*args, directory=str(DATA/'public'), **kwargs)
     def log_message(self, *args): pass
+    def owner(self):
+        return AUTH is not None and AUTH.allowed(self.client_address[0],self.headers.get('Cookie'))
+    def list_directory(self,path):
+        self.send_error(404)
+        return None
     def reply(self, code, value):
         raw = json.dumps(value, ensure_ascii=False).encode()
         self.send_response(code); self.send_header('Content-Type','application/json; charset=utf-8')
         self.send_header('Cache-Control','no-store'); self.send_header('Content-Length',str(len(raw)))
         self.end_headers(); self.wfile.write(raw)
     def do_GET(self):
+        route=urlparse(self.path).path
+        if route == '/news.json':
+            value=json.loads((DATA/'public/news.json').read_text(encoding='utf-8'))
+            if not self.owner():
+                value['settings']={};value['models']=[];value.pop('llmHealth',None)
+                value['delivery']={'state':'private','text':'Управление уведомлениями доступно владельцу.'}
+                value['status']={k:v for k,v in value.get('status',{}).items() if k in ('checked','sources','accepted','pending','needs_full_text')}
+                for card in value.get('news',[]):
+                    card.get('verification',{}).pop('receipts',None)
+                    card.get('processing',{}).pop('error',None)
+            return self.reply(200,value)
         if self.path == '/api/status':
+            if not self.owner():
+                return self.reply(200,{'owner':False,'available':True})
             from llm_health import report
             with db() as c:
                 job = c.execute('SELECT * FROM jobs ORDER BY id DESC LIMIT 1').fetchone()
                 schedule = c.execute("SELECT value FROM settings WHERE key='schedule'").fetchone()[0]
                 pending = c.execute("SELECT count(*) FROM outbox WHERE state='pending'").fetchone()[0]
                 history = [dict(row) for row in c.execute('SELECT * FROM jobs ORDER BY id DESC LIMIT 10')]
-            return self.reply(200, {'token':TOKEN,'job':dict(job) if job else None,'schedule':schedule,
+            return self.reply(200, {'owner':True,'token':TOKEN,'job':dict(job) if job else None,'schedule':schedule,
                 'b24Configured':bool(os.environ.get('B24_WEBHOOK')),'pendingMessages':pending,'pid':os.getpid(),'runtime':'local' if os.name=='nt' else 'docker','health':report(persist=False),'history':history,
                 'settings':json.loads((DATA/'monitor-settings.json').read_text(encoding='utf-8'))})
         if self.path.startswith('/api/'): return self.reply(404, {'error':'Not found'})
+        allowed = {'/','/index.html','/app.css','/editorial.css','/readable.css','/minimal.css','/app.js','/material.js','/operations.js'}
+        import re
+        if route not in allowed and not re.fullmatch(r'/materials/[a-f0-9]+\.md',route):
+            return self.reply(404,{'error':'Not found'})
         return super().do_GET()
     def do_POST(self):
         origin = self.headers.get('Origin')
-        if self.headers.get('X-Monitor-Token') != TOKEN or (origin and urlparse(origin).netloc != self.headers.get('Host')):
+        if origin and urlparse(origin).netloc != self.headers.get('Host'):
+            return self.reply(403, {'error':'Недопустимый источник запроса'})
+        if self.path == '/api/login':
+            if not AUTH.local(self.client_address[0]) or not origin or urlparse(origin).hostname not in ('localhost','127.0.0.1'):
+                return self.reply(403, {'error':'Вход владельца доступен только на этом ПК'})
+            try:
+                size=int(self.headers.get('Content-Length','0'))
+                if not 0<size<512: raise ValueError()
+                token=AUTH.login(self.client_address[0],json.loads(self.rfile.read(size)).get('key'))
+                if not token: return self.reply(403,{'error':'Неверный ключ'})
+                self.send_response(200)
+                self.send_header('Set-Cookie','monitor_owner='+token+'; HttpOnly; SameSite=Strict; Path=/; Max-Age=28800')
+                self.send_header('Cache-Control','no-store');self.send_header('Content-Length','2')
+                self.end_headers();self.wfile.write(b'{}');return
+            except (ValueError,TypeError): return self.reply(400,{'error':'Некорректный запрос'})
+        if not self.owner():
+            return self.reply(403, {'error':'Управление доступно только владельцу'})
+        if self.headers.get('X-Monitor-Token') != TOKEN:
             return self.reply(403, {'error':'Обновите страницу'})
         try:
             length = int(self.headers.get('Content-Length','0'))
