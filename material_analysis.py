@@ -41,24 +41,8 @@ def fetch_text(url):
         if len(raw)>12_000_000: raise ValueError('Document too large')
         charset=response.headers.get_content_charset()
     if mime=='application/pdf' or raw.startswith(b'%PDF'):
-        from pypdf import PdfReader
-        pdf=PdfReader(io.BytesIO(raw))
-        if len(pdf.pages)>200: raise ValueError('PDF exceeds 200 pages; requires split')
-        text='\n'.join(page.extract_text() or '' for page in pdf.pages)
-        if len(text.strip())<120:
-            if os.environ.get('OCR_ENABLED')!='yes' or not shutil.which('pdftoppm') or not shutil.which('tesseract'):
-                raise ValueError('Scanned PDF requires OCR')
-            if len(pdf.pages)>25:raise ValueError('Scanned PDF exceeds automatic OCR page limit')
-            with tempfile.TemporaryDirectory(prefix='regulator-ocr-') as folder:
-                root=Path(folder);file=root/'source.pdf';file.write_bytes(raw)
-                subprocess.run(['pdftoppm','-r','130','-png',str(file),str(root/'page')],check=True,capture_output=True,timeout=120)
-                chunks=[]
-                for page in sorted(root.glob('page-*.png')):
-                    result=subprocess.run(['tesseract',str(page),'stdout','-l','rus+eng'],check=True,capture_output=True,timeout=30)
-                    chunks.append(result.stdout.decode('utf-8',errors='replace'))
-                text='\n'.join(chunks)
-            if len(text.strip())<120:raise ValueError('OCR did not extract sufficient text')
-        return text
+        from pdf_extract import extract_pdf
+        return extract_pdf(raw)
     if mime not in ('text/html','text/plain'): raise ValueError('Unsupported document format')
     if not charset:
         found=re.search(br'charset=["\s]*([\w-]+)',raw[:5000],re.I)
@@ -105,6 +89,9 @@ BRIEF_PROMPT+='''\nПисьмо или ответ ЦБ — разъяснени�
 Для порога «от 20 млн» не пиши «больше 20 млн». Не приписывай рекомендации СРО обязательности.
 Рассылка шаблона/методички участникам СРО — «новость», а не «инициатива» и не «принятый_акт».
 Каждый evidence.claim должен подтверждаться указанной строкой целиком; не добавляй в claim условия соседней строки.'''
+
+from importance_policy import POLICY, POLICY_VERSION
+BRIEF_PROMPT += '\n' + POLICY
 
 
 def valid_brief(brief,source):
@@ -194,7 +181,7 @@ def analyze_material(doc, generator='poolside/laguna-s-2.1:free', reviewer_model
     return {**doc,'body':body,'brief':brief,'brief_verified':True,
         'checked':datetime.now(timezone.utc).isoformat(),'model':analyst.model,
         'source_hash':hashlib.sha256(source.encode()).hexdigest(),
-        'verification':{'citations':True,'review':review,'receipts':analyst.receipts+reviewer.receipts}}
+        'verification':{'citations':True,'review':review,'policy_version':POLICY_VERSION,'receipts':analyst.receipts+reviewer.receipts}}
 
 
 def main():

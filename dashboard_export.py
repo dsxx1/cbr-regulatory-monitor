@@ -126,6 +126,8 @@ def export():
         'schedule':{'timezone':'Europe/Moscow','hours':['09:17','13:17'],'weekdays':[1,2,3,4,5]},
         'delivery':{'state':'blocked','text':'Б24: требуется право imbot','verifiedAt':'2026-09-20'},
         'news':list(cards.values()), 'models':MODELS,'backlog':{k:v for k,v in queue.items() if k!='items'}}
+    from llm_health import report
+    output['llmHealth'] = report()
     delivery=Path('public/delivery.json')
     if delivery.exists(): output['delivery']=json.loads(delivery.read_text(encoding='utf-8'))
     Path('public').mkdir(exist_ok=True)
@@ -139,7 +141,7 @@ def export():
         card['markdownUrl']=filename
         card['markdownKind']='analysis' if card.get('brief') else 'source'
     Path('public/news.json').write_text(json.dumps(output,ensure_ascii=False,indent=2),encoding='utf-8')
-    for name in ('index.html','app.css','app.js','material.js','editorial.css'):
+    for name in ('index.html','app.css','app.js','material.js','editorial.css','readable.css','operations.js'):
         shutil.copyfile(Path('web')/name,Path('public')/name)
     print(f'Dashboard: {len(cards)} cards exported')
 

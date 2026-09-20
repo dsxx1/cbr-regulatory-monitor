@@ -1,0 +1,2 @@
+# Optional CPU converter: installed only on cloud PDF runs.
+docling==2.129.0

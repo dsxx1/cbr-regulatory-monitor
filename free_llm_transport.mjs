@@ -1,4 +1,11 @@
 // Built-in fetch only. Public document in stdin; no credentials or paid fallback.
+import {mkdirSync, writeFileSync} from 'node:fs';
+import {randomUUID} from 'node:crypto';
+function record(route,status,started,reason='') {
+  const event={id:randomUUID(),at:new Date().toISOString(),route,status,ms:Date.now()-started,reason};
+  mkdirSync('out/llm-events',{recursive:true});
+  writeFileSync(`out/llm-events/${event.id}.json`,JSON.stringify(event));
+}
 let input = '';
 for await (const part of process.stdin) input += part;
 try {
@@ -10,6 +17,7 @@ try {
   const routes=[...new Set([payload.model,'poolside/laguna-s-2.1:free','inclusionai/ling-3.0-flash-vl:free'])];
   const attempts=[];let envelope;
   for(const id of routes){
+    const started=Date.now();
     const model=catalog.data?.find(m=>m.id===id);
     if(!model || String(model.pricing?.prompt)!=='0' || String(model.pricing?.completion)!=='0' || Object.values(model.pricing).some(v=>!/^0(?:\.0+)?$/.test(String(v)))){attempts.push({route:id,error:'price not verified'});continue;}
     try{
@@ -20,8 +28,9 @@ try {
       if(result.usage?.cost!=null && Number(result.usage.cost)!==0)throw new Error('NONZERO_COST');
       if(result.error || !result.choices?.[0]?.message?.content)throw new Error('empty response');
       if(result.choices[0].finish_reason==='length')throw new Error('truncated response');
+      record(id,'response',started);
       envelope={result,pricing:model.pricing,route:id,attempts};break;
-    }catch(error){if(error.message==='NONZERO_COST')throw error;attempts.push({route:id,error:error.name+': '+error.message});}
+    }catch(error){record(id,'failed',started,error.message==='NONZERO_COST'?'cost':/429/.test(error.message)?'rate_limit':error.name==='TimeoutError'?'timeout':error.message==='truncated response'?'truncated':'provider_error');if(error.message==='NONZERO_COST')throw error;attempts.push({route:id,error:error.name+': '+error.message});}
   }
   if(!envelope)throw new Error('Free routes unavailable: '+JSON.stringify(attempts));
   process.stdout.write(JSON.stringify(envelope));

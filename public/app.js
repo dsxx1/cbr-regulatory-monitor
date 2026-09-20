@@ -1,15 +1,15 @@
 'use strict';
 const $ = s => document.querySelector(s);
 const el = (tag, cls, text) => {const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;};
-const priorities={unknown:'Не оценено',high:'Важная',medium:'Средняя',low:'Низкая',news:'Просто новость'};
+const priorities={unknown:'Не оценено',high:'Важно',medium:'Подготовиться',low:'Учесть',news:'Для сведения'};
 const stages={verified:'Проверено · цитаты + LLM',pending:'В очереди анализа',needs_text:'Нужен полный текст',collected:'Собрано · без анализа'};
 const titles={feed:['Что изменилось','Публикации, источники и проверенные выводы — в одном месте.'],saved:['Сохранённое','Ваши материалы. Сохраняются только в этом браузере.'],sources:['Источники и расписание','Когда проверили ресурсы, что ответило и где есть пробелы.'],quality:['Качество анализа','Результаты последнего запуска. Отказ — тоже результат проверки.'],settings:['Модели и настройки','Бесплатные модели, лимиты и управление облачным процессом.']};
 let data, view='feed', priority='all', shown=24, current=null, readerTab='summary', loading=false;
 function readLocal(key,fallback){try{return JSON.parse(localStorage.getItem(key))??fallback;}catch{return fallback;}}
 let saved=new Set(readLocal('regulator-saved',[]));
 function store(key,val){try{localStorage.setItem(key,JSON.stringify(val));}catch{}}
-document.documentElement.dataset.theme=readLocal('regulator-theme-v3','dark');
-$('#theme').onclick=()=>{let t=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=t;store('regulator-theme-v3',t);};
+document.documentElement.dataset.theme=readLocal('regulator-theme-v4','light');
+$('#theme').onclick=()=>{let t=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=t;store('regulator-theme-v4',t);};
 const urlSafe = value => {try{const u=new URL(value);return u.protocol==='https:'?u.href:'';}catch{return '';}};
 function dateValue(value){if(!value)return 0;const m=String(value).match(/^(\d{2})\.(\d{2})\.(\d{4})/);const t=Date.parse(m?`${m[3]}-${m[2]}-${m[1]}`:value);return Number.isFinite(t)?t:0;}
 function formatDate(value,time=false){const t=dateValue(value);return t?new Intl.DateTimeFormat('ru-RU',{day:'2-digit',month:'short',year:'numeric',...(time?{hour:'2-digit',minute:'2-digit',timeZone:'Asia/Yekaterinburg'}:{})}).format(t):'Дата не указана';}

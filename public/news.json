@@ -193,7 +193,7 @@
   "settings": {
     "generator": "kilo-auto/free",
     "reviewer": "inclusionai/ling-3.0-flash-vl:free",
-    "max_calls": 3
+    "max_calls": 5
   },
   "schedule": {
     "timezone": "Europe/Moscow",
@@ -14100,5 +14100,13 @@
       "needs_operator": 0
     },
     "total": 399
+  },
+  "llmHealth": {
+    "window": "Последние 300 попыток маршрутов после включения журнала",
+    "events": [],
+    "attempts": 0,
+    "responses": 0,
+    "failures": 0,
+    "last": null
   }
 }

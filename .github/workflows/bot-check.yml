@@ -1,0 +1,22 @@
+name: Проверить подключение бота Б24
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: cloud-monitor
+  cancel-in-progress: false
+jobs:
+  delivery:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Отправить контрольное сообщение только в согласованный чат
+        env:
+          B24_WEBHOOK: ${{ secrets.B24_WEBHOOK }}
+        run: |
+          python -c "from pathlib import Path; Path('runtime').mkdir(exist_ok=True); Path('runtime/bot-check.txt').write_text('Проверка подключения бота мониторинга. Это служебное сообщение, не новость и не новая обязанность. Сайт: https://dsxx1.github.io/cbr-regulatory-monitor/', encoding='utf-8')"
+          python bot_cloud.py --message runtime/bot-check.txt

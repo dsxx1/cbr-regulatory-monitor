@@ -1,0 +1,43 @@
+name: Проверить новости сейчас
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+concurrency:
+  group: cloud-monitor
+  cancel-in-progress: false
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: pip install -r requirements.txt
+      - run: python -m unittest discover -q
+      - run: python cloud_monitor.py
+      - run: python backfill.py --limit 3 --workers 1
+      - name: Сохранить данные
+        if: always()
+        run: |
+          python dashboard_export.py
+          git config user.name cbr-monitor
+          git config user.email cbr-monitor@users.noreply.github.com
+          git add cloud-state.json material-briefs.json analysis-queue.json source-cache.json llm-health.json public/
+          git diff --staged --quiet || git commit -m "Manual check: save progress"
+          git push origin HEAD:main
+      - uses: actions/configure-pages@v5
+        if: always()
+      - uses: actions/upload-pages-artifact@v3
+        if: always()
+        with:
+          path: public
+      - uses: actions/deploy-pages@v4
+        if: always()
