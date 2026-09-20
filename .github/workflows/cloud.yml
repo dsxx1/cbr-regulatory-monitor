@@ -4,7 +4,7 @@ on:
     inputs:
       mode:
         type: choice
-        options: [probe, run, control]
+        options: [probe, run, control, status]
         default: probe
   schedule:
     - cron: '17 6,10 * * 1-5'
@@ -36,31 +36,44 @@ jobs:
         if: inputs.mode != 'probe'
         run: python -m unittest discover -v
       - name: Материалы и бесплатная модель
-        if: inputs.mode != 'probe'
+        if: inputs.mode != 'probe' && inputs.mode != 'status'
         env:
           CONTROL_RUN: ${{ inputs.mode == 'control' && 'yes' || 'no' }}
         run: python cloud_monitor.py
+      - name: Проверить готовность доставки без сообщений
+        if: inputs.mode == 'status'
+        env:
+          B24_WEBHOOK: ${{ secrets.B24_WEBHOOK }}
+        run: python bot_cloud.py --check-delivery
       - name: Зафиксировать публичное состояние
         if: inputs.mode != 'probe'
         run: |
           git config user.name cbr-monitor
           git config user.email cbr-monitor@users.noreply.github.com
           git add cloud-state.json public/
+          if [ -f material-briefs.json ]; then git add material-briefs.json; fi
           git diff --staged --quiet || git commit -m "Cloud monitor: public evidence and status"
           git push origin HEAD:main
       - name: Доставка в подтверждённый чат
         id: delivery
         continue-on-error: true
-        if: inputs.mode != 'probe'
+        if: inputs.mode != 'probe' && inputs.mode != 'status'
         env:
           B24_WEBHOOK: ${{ secrets.B24_WEBHOOK }}
         run: python bot_cloud.py
       - name: Подтвердить доставку в состоянии
-        if: inputs.mode != 'probe' && steps.delivery.outcome == 'success'
+        if: inputs.mode != 'probe' && steps.delivery.outputs.delivered == 'true'
         run: |
           python cloud_monitor.py --ack
           git add cloud-state.json
           git diff --staged --quiet || git commit -m "Cloud monitor: acknowledge delivery"
+          git push origin HEAD:main
+      - name: Сохранить понятный статус доставки
+        if: inputs.mode != 'probe'
+        run: |
+          python dashboard_export.py
+          git add public/
+          git diff --staged --quiet || git commit -m "Update public delivery status"
           git push origin HEAD:main
       - uses: actions/configure-pages@v5
         if: inputs.mode != 'probe'

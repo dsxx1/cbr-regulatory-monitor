@@ -11,6 +11,7 @@ import sources
 from free_llm import FreeAnalyzer
 from industry_history import collect_industry
 from dashboard_export import export as export_dashboard, settings as dashboard_settings
+from material_analysis import analyze_material, fetch_text
 
 STATE = Path('cloud-state.json')
 
@@ -71,42 +72,45 @@ def main():
         'Не дополняй источник внешними знаниями.')
     accepted, rejected = [], []
     review_results = []
+    briefs_path=Path('material-briefs.json')
+    briefs=json.loads(briefs_path.read_text(encoding='utf-8')) if briefs_path.exists() else {}
     candidates = list(state['queue'].items())
     if control:
         candidates = [(k,d) for k,d in candidates if k.startswith('control:')]
     for key, doc in candidates[:model_config['max_calls']]:
         print('Analyzing public document: '+key,flush=True)
-        text = doc['title']+'\n'+doc['body']
         if len(doc['body']) < 120:
-            state.setdefault('needs_full_text',{})[key] = doc
-            del state['queue'][key]
-            rejected.append(key)
-            continue
-        analysis = analyzer.analyze(text)
-        approved = False
-        if quality(analysis,text):
-            print('Literal citations passed; starting independent review: '+key,flush=True)
             try:
-                if reviewer.budget_left <= 0:
-                    raise RuntimeError('Free review budget exhausted')
-                reviewer.calls += 1
-                review = reviewer._call(json.dumps({'source':text,'summary':analysis},ensure_ascii=False))
-                approved = isinstance(review,dict) and review.get('approved') is True and review.get('issues') == []
-                review_results.append({'key':key,'approved':approved,'issues':review.get('issues',[])})
+                doc['body']=fetch_text(doc['url'])
+                state.get('needs_full_text',{}).pop(key,None)
             except Exception as exc:
-                reviewer.errors.append('Independent review: '+str(exc)[:200])
-        if approved:
-            card = {'key':key,'title':doc['title'],'url':doc['url'],'source':doc['source_title'],
-                    'analysis':analysis,'checked':now,'control':key.startswith('control:'),
-                    'source_date':doc.get('published') or doc.get('modification','')}
+                state.setdefault('needs_full_text',{})[key]=doc
+                state['queue'][key]=state['queue'].pop(key)
+                rejected.append(key)
+                continue
+        analyzer.calls+=1
+        try:
+            result=analyze_material(doc,model_config['generator'],model_config['reviewer'])
+            briefs[doc['key']]=result
+            brief=result['brief']
+            analysis={'requirements':[{'text':x['claim'],'citation':x['citation']} for x in brief['evidence']],
+                      'model':result['model']}
+            card={**result,'key':key,'analysis':analysis,'source':doc['source_title'],
+                  'control':key.startswith('control:'),'source_date':doc.get('published') or doc.get('modification','')}
+            reviewer.calls+=1
+            receipts=result['verification']['receipts']
+            analyzer.receipts.extend(receipts[:1]);reviewer.receipts.extend(receipts[1:])
+            review_results.append({'key':key,'approved':True,'issues':[]})
             accepted.append(card)
             state['cards'].append(card)
             del state['queue'][key]
-        else:
+        except Exception as exc:
+            analyzer.errors.append(type(exc).__name__+': '+str(exc)[:160])
             rejected.append(key)
             # Retry later without blocking subsequent documents in the queue.
             state['queue'][key] = state['queue'].pop(key)
     state['cards'] = state['cards'][-100:]
+    briefs_path.write_text(json.dumps(briefs,ensure_ascii=False,indent=2),encoding='utf-8')
     failed_sources = [s['name'] for s in source_log if s['status'] != 'ok']
     status = {'checked':now,'documents':len(documents),'sources':source_log,
               'llm_calls':analyzer.calls,'accepted':len(accepted),'rejected':len(rejected),
@@ -123,6 +127,9 @@ def main():
         for card in accepted:
             lines.extend(['',('Контрольный пример из архива: ' if card['control'] else '')+card['title'][:220],
                           'Дата в источнике: '+card.get('source_date','не определена'),card['url']])
+            if card.get('brief'):
+                lines.extend([card['brief']['summary'], 'Почему важно: '+card['brief']['priority_reason'],
+                              'Влияние: '+card['brief']['impact'], 'Сроки: '+card['brief']['timing']])
             for req in card['analysis']['requirements'][:2]:
                 lines.extend(['• '+req['text'][:600], 'Основание: «'+req['citation'][:800]+'»'])
         if rejected:

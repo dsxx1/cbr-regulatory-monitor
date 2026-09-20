@@ -4,6 +4,7 @@ import hashlib
 import hmac
 import json
 import os
+from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
@@ -11,6 +12,22 @@ from urllib.error import HTTPError
 
 PORTAL = 'sks-portal.bitrix24.ru'
 DIALOG = 'chat374331'
+
+
+class DeliveryBlocked(RuntimeError):
+    """Expected configuration boundary, not a failed collection run."""
+
+
+def report_delivery(state, text, delivered=False):
+    Path('public').mkdir(exist_ok=True)
+    Path('public/delivery.json').write_text(json.dumps({'state':state,'text':text,
+        'verifiedAt':datetime.now(timezone.utc).isoformat()},ensure_ascii=False),encoding='utf-8')
+    if os.environ.get('GITHUB_OUTPUT'):
+        with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as out:
+            out.write('delivered='+('true' if delivered else 'false')+'\n')
+    if os.environ.get('GITHUB_STEP_SUMMARY'):
+        with open(os.environ['GITHUB_STEP_SUMMARY'],'a',encoding='utf-8') as out:
+            out.write('### Доставка в Б24\n\n'+text+'\n')
 
 
 def call(method, params):
@@ -28,10 +45,14 @@ def call(method, params):
             code = json.load(exc).get('error','HTTP_ERROR')
         except Exception:
             code = 'HTTP_ERROR'
+        if method=='imbot.v2.Bot.register' and str(code).lower()=='insufficient_scope':
+            raise DeliveryBlocked('Сбор работает. Отправка в Б24 ожидает права «Чат-боты» (imbot). Сообщение сохранено.') from None
         raise RuntimeError(f'{method}: HTTP {exc.code} {str(code)[:80]}') from None
     except Exception as exc:
         raise RuntimeError(f'{method}: {type(exc).__name__}') from None
     if data.get('error'):
+        if method=='imbot.v2.Bot.register' and str(data['error']).lower()=='insufficient_scope':
+            raise DeliveryBlocked('Сбор работает. Отправка в Б24 ожидает права «Чат-боты» (imbot). Сообщение сохранено.')
         raise RuntimeError(f'{method}: {str(data["error"])[:80]}')
     return data.get('result')
 
@@ -44,8 +65,16 @@ def token():
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--probe', action='store_true')
+    parser.add_argument('--check-delivery', action='store_true')
     parser.add_argument('--message', default='runtime/message.txt')
     args = parser.parse_args()
+    if args.check_delivery:
+        methods=call('methods',{})
+        if isinstance(methods,dict): methods=methods.get('methods',[])
+        if 'imbot.v2.bot.register' not in [str(m).lower() for m in methods]:
+            raise DeliveryBlocked('Мониторинг и сайт работают. Для отправки ботом нужно право «Чат-боты» (imbot).')
+        report_delivery('ready','Методы чат-бота доступны. Контрольная отправка ещё не выполнялась.')
+        return
     if args.probe:
         methods = call('methods', {})
         if isinstance(methods, dict):
@@ -75,6 +104,7 @@ def main():
     for item in previous.get('messages', []):
         if key in item.get('text','') and str(item.get('author_id')) == str(bot_id):
             print('Already delivered; no duplicate')
+            report_delivery('delivered','Сообщение уже найдено в чате, повторно не отправлено.',True)
             return
     result = call('imbot.v2.Chat.Message.send', {'botId':bot_id,'botToken':token(),
         'dialogId':DIALOG,'fields':{'message':message[:19000]+'\n'+key,'urlPreview':False}})
@@ -86,11 +116,16 @@ def main():
     print(json.dumps({'delivered':True,'read_back_verified':verified,'message_id':result['id'],'bot_id':bot_id}))
     if not verified:
         raise RuntimeError('Message accepted, but read-back not verified; inspect chat before retry')
+    report_delivery('delivered','Сообщение отправлено ботом и найдено при повторном чтении чата.',True)
 
 
 if __name__ == '__main__':
     try:
         main()
+    except DeliveryBlocked as exc:
+        report_delivery('blocked',str(exc))
+        print(str(exc))
     except RuntimeError as exc:
+        report_delivery('error','Не удалось подтвердить доставку. Проверьте журнал запуска; сообщение сохранено.')
         print(str(exc))
         raise SystemExit(1)

@@ -3,7 +3,7 @@ let input = '';
 for await (const part of process.stdin) input += part;
 try {
   const payload = JSON.parse(input);
-  if (!['kilo-auto/free','inclusionai/ling-3.0-flash-vl:free'].includes(payload.model)) throw new Error('Model not allowed');
+  if (!['kilo-auto/free','inclusionai/ling-3.0-flash-vl:free','poolside/laguna-s-2.1:free'].includes(payload.model)) throw new Error('Model not allowed');
   const catalogReply = await fetch('https://api.kilo.ai/api/gateway/models', {signal: AbortSignal.timeout(20000)});
   if (!catalogReply.ok) throw new Error(`Catalog HTTP ${catalogReply.status}`);
   const catalog = await catalogReply.json();

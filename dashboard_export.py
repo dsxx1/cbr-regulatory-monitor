@@ -31,13 +31,11 @@ def document_type(doc):
 
 
 def priority(doc, kind):
-    title = doc.get('title','').lower().replace('ё','е')
-    if any(w in title for w in ('семинар','вебинар','конференц','поздрав')): return 'news'
-    if any(w in title for w in ('вступил в силу','вступили в силу','новый порядок','полной стоимости кредита','предельные значения пск')): return 'high'
-    if kind == 'Правовой акт' or (doc.get('analysis') or {}).get('requirements'): return 'high'
-    if any(w in title for w in ('изменени','отчетност','требован','пск','проект','новые правила','лимит','учетная политик','цифровой рубль')): return 'medium'
-    if any(w in title for w in ('обзор','аналитик','статистик')): return 'low'
-    return 'news'
+    brief=doc.get('brief') or {}
+    value=brief.get('priority')
+    if doc.get('brief_verified') and brief.get('priority_reason') and value in ('high','medium','low','news'):
+        return value
+    return 'unknown'
 
 
 def project(doc, stage, archive=False):
@@ -54,9 +52,28 @@ def project(doc, stage, archive=False):
         'checked':doc.get('checked',''), 'body':doc.get('body','')[:30000],
         'type':kind, 'priority':priority(doc,kind), 'stage':stage,
         'archive':archive or bool(doc.get('control')), 'control':bool(doc.get('control')),
-        'requirements':requirements, 'model':analysis.get('model',''),
+        'requirements':requirements, 'model':doc.get('model') or analysis.get('model',''),
+        'brief':doc.get('brief') if doc.get('brief_verified') else None,
+        'verification':doc.get('verification',{}),
         'dateConflict':bool(doc.get('date_mismatch')),
-        'summary':requirements[0]['text'] if requirements else ''}
+        'summary':(doc.get('brief') or {}).get('summary') if doc.get('brief_verified') else (requirements[0]['text'] if requirements else '')}
+
+
+def material_markdown(card):
+    brief=card['brief']
+    lines=['# '+card['title'],'',f"Источник: {card['url']}",'',
+        '## Что произошло','',brief['summary'],'','## Статус','',brief['event_status'],'',
+        '## Почему такая важность','',brief['priority_reason'],'','## Влияние на работу','',brief['impact'],'',
+        '## Сроки','',brief['timing'],'','## Рекомендуемые действия','',
+        *['- '+x for x in brief['actions']],'','## Что ещё проверить','',
+        *['- '+x for x in brief['uncertainties']],'','## Основания','']
+    for evidence in brief['evidence']:
+        lines.extend([evidence['claim'],'','> '+evidence['citation'],''])
+    verification=card.get('verification',{})
+    if verification.get('context_note'): lines.extend(['## Нормативный контекст','',verification['context_note'],''])
+    for ref in verification.get('references',[]): lines.append(f"[{ref['title']}]({safe_url(ref['url'])})")
+    lines.extend(['','---',verification.get('note','Цитаты проверены; выводы прошли отдельный запрос LLM.'),'Применимость подтверждает специалист.'])
+    return '\n'.join(lines)+'\n'
 
 
 def export():
@@ -78,6 +95,11 @@ def export():
         if original:
             merged['source'] = original.get('source','')
         cards[key] = project(merged,'verified')
+    briefs_path=Path('material-briefs.json')
+    if briefs_path.exists():
+        for key,doc in json.loads(briefs_path.read_text(encoding='utf-8')).items():
+            if doc.get('brief_verified'):
+                cards[key]=project(doc,'verified')
     status = json.loads(json.dumps(state.get('status',{})))
     for source in status.get('sources',[]):
         source['detail'] = source.get('detail','').replace('single_public_archive_not_verified_complete','открытый архив; полнота не подтверждена').replace('current_news_window_only; older_archive_not_collected','текущее окно новостей; старый архив не собран')
@@ -85,9 +107,17 @@ def export():
         'schedule':{'timezone':'Europe/Moscow','hours':['09:17','13:17'],'weekdays':[1,2,3,4,5]},
         'delivery':{'state':'blocked','text':'Б24: требуется право imbot','verifiedAt':'2026-09-20'},
         'news':list(cards.values()), 'models':MODELS}
+    delivery=Path('public/delivery.json')
+    if delivery.exists(): output['delivery']=json.loads(delivery.read_text(encoding='utf-8'))
     Path('public').mkdir(exist_ok=True)
+    for card in output['news']:
+        if card.get('brief'):
+            filename='materials/'+card['id']+'.md'
+            Path('public/materials').mkdir(exist_ok=True)
+            Path('public',filename).write_text(material_markdown(card),encoding='utf-8')
+            card['markdownUrl']=filename
     Path('public/news.json').write_text(json.dumps(output,ensure_ascii=False,indent=2),encoding='utf-8')
-    for name in ('index.html','app.css','app.js'):
+    for name in ('index.html','app.css','app.js','material.js','editorial.css'):
         shutil.copyfile(Path('web')/name,Path('public')/name)
     print(f'Dashboard: {len(cards)} cards exported')
 

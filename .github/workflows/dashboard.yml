@@ -2,7 +2,7 @@ name: Обновить интерфейс
 on:
   push:
     branches: [main]
-    paths: ['web/**', 'dashboard_export.py', 'monitor-settings.json', 'news-catalog.json', '.github/workflows/dashboard.yml']
+    paths: ['web/**', 'dashboard_export.py', 'monitor-settings.json', 'news-catalog.json', 'material-briefs.json', '.github/workflows/dashboard.yml']
   workflow_dispatch:
 permissions:
   contents: read
