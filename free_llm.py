@@ -38,7 +38,7 @@ class FreeAnalyzer(Analyzer):
 
     def _call(self, text):
         payload = {'model': MODEL, 'messages': [
-            {'role': 'system', 'content': SYSTEM_PROMPT},
+            {'role': 'system', 'content': getattr(self, 'system_prompt', SYSTEM_PROMPT)},
             {'role': 'user', 'content': '<document>\n' + text[:18000] + '\n</document>'}],
             'max_tokens': 6000, 'temperature': 0, 'usage': {'include': True}}
         completed = subprocess.run(['node', str(Path(__file__).with_name('free_llm_transport.mjs'))],
