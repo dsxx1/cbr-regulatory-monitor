@@ -35,6 +35,8 @@ jobs:
       - name: Проверки качества
         if: inputs.mode != 'probe'
         run: python -m unittest discover -v
+      - run: pip install -r requirements.txt
+        if: inputs.mode != 'probe' && inputs.mode != 'status'
       - name: Материалы и бесплатная модель
         if: inputs.mode != 'probe' && inputs.mode != 'status'
         env:

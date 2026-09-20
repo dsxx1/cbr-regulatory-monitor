@@ -1,0 +1,49 @@
+name: Разбор накопленных материалов
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '43 * * * *'
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+concurrency:
+  group: cloud-monitor
+  cancel-in-progress: false
+jobs:
+  process:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: pip install -r requirements.txt
+      - name: Подготовить распознавание PDF
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils tesseract-ocr tesseract-ocr-rus
+      - run: python -m unittest discover -v
+      - name: Обработать следующую порцию
+        env:
+          OCR_ENABLED: 'yes'
+        run: python backfill.py --limit 6 --workers 2
+      - name: Сохранить прогресс и сайт
+        if: always()
+        run: |
+          python dashboard_export.py
+          git config user.name cbr-monitor
+          git config user.email cbr-monitor@users.noreply.github.com
+          git add material-briefs.json analysis-queue.json source-cache.json public/
+          git diff --staged --quiet || git commit -m "Backlog: save document processing progress"
+          git push origin HEAD:main
+      - uses: actions/configure-pages@v5
+        if: always()
+      - uses: actions/upload-pages-artifact@v3
+        if: always()
+        with:
+          path: public
+      - uses: actions/deploy-pages@v4
+        if: always()

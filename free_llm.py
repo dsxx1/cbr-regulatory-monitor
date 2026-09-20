@@ -38,18 +38,20 @@ class FreeAnalyzer(Analyzer):
         return True
 
     def _call(self, text):
+        if len(text)>65000:
+            raise ValueError('Input too long; silent truncation prohibited')
         payload = {'model': self.model, 'messages': [
             {'role': 'system', 'content': getattr(self, 'system_prompt', SYSTEM_PROMPT)},
-            {'role': 'user', 'content': '<document>\n' + text[:18000] + '\n</document>'}],
+            {'role': 'user', 'content': '<document>\n' + text + '\n</document>'}],
             'max_tokens': 6000, 'temperature': 0, 'usage': {'include': True}}
         completed = subprocess.run(['node', str(Path(__file__).with_name('free_llm_transport.mjs'))],
-            input=json.dumps(payload), text=True, encoding='utf-8', capture_output=True, timeout=115)
+            input=json.dumps(payload), text=True, encoding='utf-8', capture_output=True, timeout=180)
         if completed.returncode:
             raise RuntimeError(completed.stderr[:250])
         envelope = json.loads(completed.stdout)
         result, pricing = envelope['result'], envelope['pricing']
         verify_price({'data': [{'id': self.model, 'pricing': pricing}]}, self.model)
-        self.receipts.append({'model': result.get('model'), 'pricing': pricing,
+        self.receipts.append({'model': result.get('model'), 'pricing': pricing,'route':envelope.get('route',self.model),'attempts':envelope.get('attempts',[]),
                               'usage': result.get('usage', {})})
         cost = result.get('usage', {}).get('cost')
         if cost is not None and Decimal(str(cost)) != 0:

@@ -49,7 +49,12 @@
     "verification": {
       "note": "Черновик подготовлен бесплатной моделью и прошёл отдельный LLM-review. При дополнительной редакционной проверке уточнено: отсутствие подтверждения в новости не доказывает отсутствия официального акта. Цитаты сверены с полным текстом; юридическая применимость не подтверждена.",
       "context_note": "Официальная страница ФПП указывает вступление базового приказа от 25.11.2025 №193н в силу с 1 марта 2026 года. Новость обсуждает поправки и возможное ускорение их введения. Эти даты нельзя смешивать; номер и статус акта о поправках следует проверить отдельно.",
-      "references": [{"title":"ФПП: базовая Инструкция №193н","url":"https://probpalata.gov.ru/federalnaya-probirnaya-palata-utverdila-edinuyu-instrukciyu-reguliruyushhuyu-klyuchevye-processy-raboty-vedomstva/"}],
+      "references": [
+        {
+          "title": "ФПП: базовая Инструкция №193н",
+          "url": "https://probpalata.gov.ru/federalnaya-probirnaya-palata-utverdila-edinuyu-instrukciyu-reguliruyushhuyu-klyuchevye-processy-raboty-vedomstva/"
+        }
+      ],
       "citations": true,
       "review": {
         "approved": true,
@@ -118,6 +123,337 @@
             },
             "completion_tokens_details": {
               "reasoning_tokens": 926,
+              "image_tokens": 0,
+              "audio_tokens": 0
+            }
+          }
+        }
+      ]
+    }
+  },
+  "sro:/1000018351.html": {
+    "key": "sro:/1000018351.html",
+    "source": "industry-sro",
+    "source_title": "СРО (отраслевой источник)",
+    "title": "Обновлена Учетная политика для ломбарда",
+    "body": "Обновлена Учетная политика для ломбарда\nУважаемые участники Ассоциации!\nВ рамках членской поддержки вам была направлена обновленная Учетная политика на 2026 год.\nВ случае если вы по какой-либо причине не получили указанную рассылку, вам необходимо обратиться к своему специалисту Ассоциации с соответствующим запросом.",
+    "url": "https://sro-lombard.ru/1000018351.html",
+    "published": "2026-08-13",
+    "modification": "",
+    "brief": {
+      "event_status": "инициатива",
+      "summary": "Ассоциация ломбардов распространила обновлённую Учетную политику на 2026 год среди своих участников как часть членской поддержки. Участникам, не получившим рассылку, рекомендовано обратиться к специалисту Ассоциации.",
+      "priority": "medium",
+      "priority_reason": "Для ломбарда важно получить и изучить обновлённую Учетную политику, чтобы оценить возможные изменения в бухгалтерском или учётном учёте, однако конкретные требования не раскрыты в публикации.",
+      "impact": "Потенциально затрагивает бухгалтерский и/или внутренний учёт ломбарда. Точные последствия неизвестны без ознакомления с текстом политики.",
+      "timing": "Политика относится к 2026 году. Сроки вступления в силу не указаны в публикации.",
+      "actions": [
+        "Убедиться, что рассылка с обновлённой Учетной политикой получена, при необходимости — запросить у специалиста Ассоциации.",
+        "Изучить полученную Учетную политику на предмет изменений, относящихся к деятельности ломбарда."
+      ],
+      "uncertainties": [
+        "Не указано, какие именно изменения внесены в Учетную политику.",
+        "Не подтверждено, когда именно политика вступает в силу.",
+        "По этой публикации не подтверждено наличие официального акта или обязательного порядка применения."
+      ],
+      "evidence": [
+        {
+          "claim": "Ассоциация ломбардов направила обновлённую Учетную политику на 2026 год участникам в рамках членской поддержки.",
+          "source_line": 4,
+          "citation": "В рамках членской поддержки вам была направлена обновленная Учетная политика на 2026 год."
+        },
+        {
+          "claim": "Участникам, не получившим рассылку, рекомендовано обратиться к специалисту Ассоциации.",
+          "source_line": 5,
+          "citation": "В случае если вы по какой-либо причине не получили указанную рассылку, вам необходимо обратиться к своему специалисту Ассоциации с соответствующим запросом."
+        }
+      ]
+    },
+    "brief_verified": true,
+    "checked": "2026-09-20T04:39:38.256525+00:00",
+    "model": "poolside/laguna-s-2.1:free",
+    "source_hash": "583d1f1ba3f34c60457c8ab16b3c8d23d2d28f26f63296b07aa32d91e0dad151",
+    "verification": {
+      "citations": true,
+      "review": {
+        "approved": true,
+        "issues": []
+      },
+      "receipts": [
+        {
+          "model": "poolside/laguna-s-2.1:free",
+          "pricing": {
+            "prompt": "0",
+            "completion": "0",
+            "discount": 0
+          },
+          "route": "poolside/laguna-s-2.1:free",
+          "attempts": [],
+          "usage": {
+            "prompt_tokens": 1113,
+            "completion_tokens": 691,
+            "total_tokens": 1804,
+            "cost": 0,
+            "is_byok": true,
+            "prompt_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "audio_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost_details": {
+              "upstream_inference_cost": 0,
+              "upstream_inference_prompt_cost": 0,
+              "upstream_inference_completions_cost": 0
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "image_tokens": 0,
+              "audio_tokens": 0
+            }
+          }
+        },
+        {
+          "model": "poolside/laguna-s-2.1:free",
+          "pricing": {
+            "prompt": "0",
+            "completion": "0",
+            "discount": 0
+          },
+          "route": "poolside/laguna-s-2.1:free",
+          "attempts": [
+            {
+              "route": "kilo-auto/free",
+              "error": "Error: HTTP 429"
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 1119,
+            "completion_tokens": 9,
+            "total_tokens": 1128,
+            "cost": 0,
+            "is_byok": false,
+            "prompt_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "audio_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost_details": {
+              "upstream_inference_cost": 0,
+              "upstream_inference_prompt_cost": 0,
+              "upstream_inference_completions_cost": 0
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "image_tokens": 0,
+              "audio_tokens": 0
+            }
+          }
+        }
+      ]
+    }
+  },
+  "sro:/1000018365.html": {
+    "key": "sro:/1000018365.html",
+    "source": "industry-sro",
+    "source_title": "СРО (отраслевой источник)",
+    "title": "Ломбарды и цифровой рубль",
+    "body": "Ломбарды и цифровой рубль\nВ своем ответе на запрос Ассоциации Банк России подтверждает обязанность ломбардов обеспечить потребителю возможность оплаты товаров (работ, услуг) путем перевода цифровых рублей.\nС 1 сентября 2026 года начинают (первыми) взаимодействие с оплатами цифровыми рублями следующие организации (ломбарды):\nорганизации, выручка за предшествующий календарный год которых превышает 120 млн рублей;\nна 1 января 2026 года у них был заключен договор о приеме электронных средств платежа с кредитной организацией, признанной Банком России значимой на рынке платежных услуг.\nНе позднее 1 сентября 2027 года:\nорганизации, выручка за предшествующий календарный год которых превышает 30 млн рублей;\nна 1 января 2026 года они являлись клиентами кредитной организации, признанной Банком России значимой на рынке платежных услуг, или банка с универсальной лицензией, на основании договора о приеме электронных средств платежа.\nНе позднее 1 сентября 2028 года – компании с выручкой от 20 млн рублей за предшествующий календарный год.",
+    "url": "https://sro-lombard.ru/1000018365.html",
+    "published": "2026-08-31",
+    "modification": "",
+    "brief": {
+      "event_status": "разъяснение",
+      "summary": "По сообщению СРО, ответ Банка России касается приёма оплаты цифровыми рублями в ломбардах. Это важная тема: применимость и срок зависят одновременно от выручки, банковских договоров и предусмотренных исключений. Нужно определить, к какой группе относится наша организация, а не считать всех ломбардов обязанными подключиться одновременно.",
+      "priority": "high",
+      "priority_reason": "Требуется приоритетная проверка сроков подключения, критериев выручки и наличия договоров с кредитными организациями, а также оценка финансовых и ИТ-рисков.",
+      "impact": "Потенциально затрагивает ломбарды, соответствующие критериям выручки и имеющие договоры с значимыми кредитными организациями. Условные последствия: интеграция с платёжной системой цифрового рубля, возможные ИТ- и учётные изменения.",
+      "timing": "По странице Банка России о приёме оплаты: не позднее 1 сентября 2026 года — выручка за предшествующий год свыше 120 млн рублей И договор приёма электронных средств платежа со значимой кредитной организацией на 1 января 2026 года; не позднее 1 сентября 2027 года — свыше 30 млн рублей И на 1 января 2026 года договор с такой организацией или банком с универсальной лицензией; не позднее 1 сентября 2028 года — остальные продавцы с выручкой от 20 млн рублей. Исключения и применимость к нашей компании проверяются отдельно.",
+      "actions": [
+        "Проверить критерии подключения и сроки в официальном акте Банка России.",
+        "Оценить ИТ-готовность ломбарда к интеграции с платёжной системой цифрового рубля.",
+        "Уточнить наличие договора о приёме электронных средств платежа с кредитной организацией на 1 января 2026 года."
+      ],
+      "uncertainties": [
+        "Не подтверждено, что ответ Банка России является обязательным актом.",
+        "По этой публикации не подтверждено, что критерии выручки применяются ко всем ломбардам без исключений.",
+        "Неясно, какие технические требования предъявлены к интеграции с цифровым рублём."
+      ],
+      "evidence": [
+        {
+          "claim": "Банк России в ответе на запрос Ассоциации подтверждает обязанность ломбардов обеспечить потребителю возможность оплаты товаров (работ, услуг) путем перевода цифровых рублей.",
+          "source_line": 3,
+          "citation": "В своем ответе на запрос Ассоциации Банк России подтверждает обязанность ломбардов обеспечить потребителю возможность оплаты товаров (работ, услуг) путем перевода цифровых рублей."
+        },
+        {
+          "claim": "С 1 сентября 2026 года начинают (первыми) взаимодействие с оплатами цифровыми рублями следующие организации (ломбарды).",
+          "source_line": 4,
+          "citation": "С 1 сентября 2026 года начинают (первыми) взаимодействие с оплатами цифровыми рублями следующие организации (ломбарды):"
+        },
+        {
+          "claim": "Не позднее 1 сентября 2028 года подключаются компании с выручкой от 20 млн рублей за предшествующий календарный год.",
+          "source_line": 10,
+          "citation": "Не позднее 1 сентября 2028 года – компании с выручкой от 20 млн рублей за предшествующий календарный год."
+        }
+      ]
+    },
+    "brief_verified": true,
+    "checked": "2026-09-20T04:47:42.818716+00:00",
+    "model": "poolside/laguna-s-2.1:free",
+    "source_hash": "e0c72816d3fe5db27e70f21d5c56bac160393568da84aa4fc266a9350c4c5045",
+    "verification": {
+      "note": "Черновик и исправление подготовлены бесплатной моделью и проверены отдельным запросом. После этого редакционно уточнены сроки и состав условий по официальной странице Банка России. Применимость к конкретной организации ещё не подтверждена.",
+      "context_note": "Банк России связывает обязанность с одновременным выполнением условий по выручке и договору с банком. На официальной странице также указаны исключения: совокупная выручка компании менее 20 млн рублей, отдельные торговые точки с выручкой менее 5 млн рублей и места без интернета. Для решения по нашему ломбарду нужны данные компании и точек; из одного названия новости это определить нельзя.",
+      "references": [{"title":"Банк России: приём оплаты в цифровых рублях","url":"https://cbr.ru/PSystem/dr/dr_for_business/accepting_payments_dr/"}],
+      "citations": true,
+      "review": {
+        "approved": true,
+        "issues": []
+      },
+      "receipts": [
+        {
+          "model": "poolside/laguna-s-2.1:free",
+          "pricing": {
+            "prompt": "0",
+            "completion": "0",
+            "discount": 0
+          },
+          "route": "poolside/laguna-s-2.1:free",
+          "attempts": [],
+          "usage": {
+            "prompt_tokens": 1636,
+            "completion_tokens": 998,
+            "total_tokens": 2634,
+            "cost": 0,
+            "is_byok": true,
+            "prompt_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "audio_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost_details": {
+              "upstream_inference_cost": 0,
+              "upstream_inference_prompt_cost": 0,
+              "upstream_inference_completions_cost": 0
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "image_tokens": 0,
+              "audio_tokens": 0
+            }
+          }
+        },
+        {
+          "model": "inclusionai/ling-3.0-flash-vl:free",
+          "pricing": {
+            "prompt": "0",
+            "completion": "0",
+            "discount": 0
+          },
+          "route": "inclusionai/ling-3.0-flash-vl:free",
+          "attempts": [
+            {
+              "route": "poolside/laguna-s-2.1:free",
+              "error": "Error: HTTP 429"
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 2171,
+            "completion_tokens": 3294,
+            "total_tokens": 5465,
+            "cost": 0,
+            "is_byok": true,
+            "prompt_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "audio_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost_details": {
+              "upstream_inference_cost": 0,
+              "upstream_inference_prompt_cost": 0,
+              "upstream_inference_completions_cost": 0
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 2632,
+              "image_tokens": 0,
+              "audio_tokens": 0
+            }
+          }
+        },
+        {
+          "model": "inclusionai/ling-3.0-flash-vl:free",
+          "pricing": {
+            "prompt": "0",
+            "completion": "0",
+            "input_cache_read": "0",
+            "input_cache_write": "0",
+            "request": "0",
+            "image": "0",
+            "web_search": "0",
+            "internal_reasoning": "0"
+          },
+          "route": "kilo-auto/free",
+          "attempts": [],
+          "usage": {
+            "prompt_tokens": 1409,
+            "completion_tokens": 1163,
+            "total_tokens": 2572,
+            "cost": 0,
+            "is_byok": true,
+            "prompt_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "audio_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost_details": {
+              "upstream_inference_cost": 0,
+              "upstream_inference_prompt_cost": 0,
+              "upstream_inference_completions_cost": 0
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 1365,
+              "image_tokens": 0,
+              "audio_tokens": 0
+            }
+          }
+        },
+        {
+          "model": "poolside/laguna-s-2.1:free",
+          "pricing": {
+            "prompt": "0",
+            "completion": "0",
+            "discount": 0
+          },
+          "route": "poolside/laguna-s-2.1:free",
+          "attempts": [
+            {
+              "route": "kilo-auto/free",
+              "error": "Error: HTTP 429"
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 2066,
+            "completion_tokens": 11,
+            "total_tokens": 2077,
+            "cost": 0,
+            "is_byok": false,
+            "prompt_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "audio_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost_details": {
+              "upstream_inference_cost": 0,
+              "upstream_inference_prompt_cost": 0,
+              "upstream_inference_completions_cost": 0
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
               "image_tokens": 0,
               "audio_tokens": 0
             }

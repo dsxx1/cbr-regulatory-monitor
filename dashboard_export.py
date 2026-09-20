@@ -49,7 +49,7 @@ def project(doc, stage, archive=False):
         'sourceCode':doc.get('source',''), 'url':safe_url(doc.get('url','')),
         'date':doc.get('published') or doc.get('modification') or doc.get('source_date',''),
         'dateKind':'Дата публикации' if doc.get('published') else 'Дата изменения источника',
-        'checked':doc.get('checked',''), 'body':doc.get('body','')[:30000],
+        'checked':doc.get('checked',''), 'body':doc.get('body','')[:30000], 'bodyExcerpt':len(doc.get('body',''))>30000,
         'type':kind, 'priority':priority(doc,kind), 'stage':stage,
         'archive':archive or bool(doc.get('control')), 'control':bool(doc.get('control')),
         'requirements':requirements, 'model':doc.get('model') or analysis.get('model',''),
@@ -61,6 +61,12 @@ def project(doc, stage, archive=False):
 
 def material_markdown(card):
     brief=card['brief']
+    if not brief:
+        return '\n'.join(['# '+card['title'],'',f"Источник: {card['url']}",'',
+            '## Статус','', 'Это исходный материал, а не подтверждённый аналитический разбор.',
+            'Важность пока не определена. '+card.get('processingText','Ожидает обработки.'),'',
+            '## Текст источника','',card.get('body') or 'Не удалось извлечь полный текст; используйте ссылку на оригинал.',
+            '', 'Полный текст длинного документа может быть представлен отдельно в файле источника.' if card.get('bodyExcerpt') else ''])+'\n'
     lines=['# '+card['title'],'',f"Источник: {card['url']}",'',
         '## Что произошло','',brief['summary'],'','## Статус','',brief['event_status'],'',
         '## Почему такая важность','',brief['priority_reason'],'','## Влияние на работу','',brief['impact'],'',
@@ -100,22 +106,38 @@ def export():
         for key,doc in json.loads(briefs_path.read_text(encoding='utf-8')).items():
             if doc.get('brief_verified'):
                 cards[key]=project(doc,'verified')
+    source_cache_path=Path('source-cache.json')
+    source_cache=json.loads(source_cache_path.read_text(encoding='utf-8')) if source_cache_path.exists() else {}
+    queue_path=Path('analysis-queue.json')
+    queue=json.loads(queue_path.read_text(encoding='utf-8')) if queue_path.exists() else {'items':{}}
+    for key,card in cards.items():
+        cached=source_cache.get(key,{})
+        if cached.get('body') and len(card.get('body',''))<120:
+            card['body']=cached['body'][:30000];card['bodyExcerpt']=len(cached['body'])>30000
+        job=queue['items'].get(key,{})
+        card['processing']=job
+        card['processingText']=({'retry':'Автоматическая повторная попытка запланирована.',
+            'needs_operator':'Автоматические попытки исчерпаны; нужна проверка причины.'}).get(job.get('state'),'Ожидает обработки.')
+        if card.get('brief'):card['processingText']='Разбор готов.'
     status = json.loads(json.dumps(state.get('status',{})))
     for source in status.get('sources',[]):
         source['detail'] = source.get('detail','').replace('single_public_archive_not_verified_complete','открытый архив; полнота не подтверждена').replace('current_news_window_only; older_archive_not_collected','текущее окно новостей; старый архив не собран')
     output = {'version':2, 'status':status, 'settings':settings(),
         'schedule':{'timezone':'Europe/Moscow','hours':['09:17','13:17'],'weekdays':[1,2,3,4,5]},
         'delivery':{'state':'blocked','text':'Б24: требуется право imbot','verifiedAt':'2026-09-20'},
-        'news':list(cards.values()), 'models':MODELS}
+        'news':list(cards.values()), 'models':MODELS,'backlog':{k:v for k,v in queue.items() if k!='items'}}
     delivery=Path('public/delivery.json')
     if delivery.exists(): output['delivery']=json.loads(delivery.read_text(encoding='utf-8'))
     Path('public').mkdir(exist_ok=True)
     for card in output['news']:
-        if card.get('brief'):
-            filename='materials/'+card['id']+'.md'
-            Path('public/materials').mkdir(exist_ok=True)
-            Path('public',filename).write_text(material_markdown(card),encoding='utf-8')
-            card['markdownUrl']=filename
+        filename='materials/'+card['id']+'.md'
+        Path('public/materials').mkdir(exist_ok=True)
+        md_card=dict(card)
+        if not card.get('brief') and source_cache.get(card['key'],{}).get('body'):
+            md_card['body']=source_cache[card['key']]['body'];md_card['bodyExcerpt']=False
+        Path('public',filename).write_text(material_markdown(md_card),encoding='utf-8')
+        card['markdownUrl']=filename
+        card['markdownKind']='analysis' if card.get('brief') else 'source'
     Path('public/news.json').write_text(json.dumps(output,ensure_ascii=False,indent=2),encoding='utf-8')
     for name in ('index.html','app.css','app.js','material.js','editorial.css'):
         shutil.copyfile(Path('web')/name,Path('public')/name)

@@ -1,6 +1,6 @@
 'use strict';
 const importanceMeaning={unknown:'Анализ не выполнен. Важность не определена.',high:'Приоритетная проверка влияния на операции ломбарда. Не означает автоматического изменения регламентов.',medium:'Нужно оценить и подготовить изменения; немедленное исполнение не установлено.',low:'Низкое ожидаемое влияние. Достаточно планового наблюдения.',news:'Информационный материал. Практические действия по источнику не выявлены.'};
-const eventNames={инициатива:'Инициатива',проект:'Проект',принятый_акт:'Принятый акт',новость:'Новость',неясно:'Статус требует проверки'};
+const eventNames={инициатива:'Инициатива',проект:'Проект',принятый_акт:'Принятый акт',разъяснение:'Разъяснение',новость:'Новость',неясно:'Статус требует проверки'};
 const originalReader=readerRender;
 const originalMarkdown=markdown;
 const baseFiltered=filtered;
@@ -19,13 +19,19 @@ function bulletSection(parent,title,items){parent.append(el('h2','',title));cons
 readerRender=function(){
  originalReader();const n=current,b=n.brief;
  const ready=Boolean(b);
- $('#download').disabled=!ready;$('#copy').disabled=!ready;
- $('#download').textContent=ready?'↓ Разбор .md':'MD-разбор не готов';
- $('#download').title=ready?'Скачать содержательный разбор':'Для экспорта разбора требуется полный текст и проверенный анализ';
+ $('#download').disabled=false;$('#copy').disabled=false;
+ $('#download').textContent=ready?'↓ Разбор .md':n.body?'↓ Исходник .md':'↓ Карточка .md';
+ $('#download').title=ready?'Скачать содержательный разбор':'Скачать материал с явной отметкой, что анализ ещё не завершён';
  const root=$('#readerContent');
  if(!ready){
-   if(readerTab==='markdown'){root.replaceChildren(el('p','callout','MD-разбор ещё не создан. Доступны только реквизиты или исходный текст. Важность не определена.'));}
-   else if(readerTab==='summary'){const info=el('div','importance-box');info.append(el('strong','','Важность не определена'),el('p','','Цвет не назначается по заголовку. Сначала нужно получить полный текст и разобрать влияние на работу.'));root.prepend(info);}
+   if(readerTab==='markdown'){root.replaceChildren(el('p','callout','Загружаем Markdown…'));readServerMarkdown(n).then(text=>{if(current?.id===n.id&&readerTab==='markdown')root.replaceChildren(el('pre','',text));}).catch(()=>root.replaceChildren(el('pre','',markdown(n))));}
+   else if(readerTab==='summary'){
+     root.replaceChildren();const info=el('div','importance-box');info.append(el('strong','',n.body?'Текст загружен · ожидает разбора':'Материал ожидает извлечения текста'),el('p','',n.processingText||'Поставлен в очередь автоматической обработки.'));
+     if(n.processing?.retry_at)info.append(el('small','','Повторная попытка не раньше '+formatDate(n.processing.retry_at,true)+' ЕКБ'));
+     root.append(info,el('h2','','Содержание источника'),el('p','',n.body?n.body.slice(0,6000):'Вложение или страница пока не распознаны. Оригинал доступен по ссылке; причина показана в очереди обработки.'));
+     if(n.body?.length>6000)root.append(el('p','review-note','Полный доступный текст — во вкладке «Текст источника» и в MD-файле.'));
+     if(n.processing?.error)root.append(el('p','review-note','Последняя попытка: '+failureText(n.processing.error)));
+   }
    return;
  }
  if(readerTab!=='summary')return;
@@ -69,4 +75,16 @@ sourcesView=function(){
  const delivery=panel('Сообщения в рабочий чат',data.delivery.text);delivery.append(el('p','','Последняя проверка доставки: '+formatDate(data.delivery.verifiedAt,true)),link('Посмотреть журнал запуска ↗','https://github.com/dsxx1/cbr-regulatory-monitor/actions/workflows/cloud.yml','button'));root.append(delivery);
 };
 const baseStats=renderStats;
-renderStats=function(){baseStats();const cells=$('#stats').children;if(cells[1]){cells[1].querySelector('label').textContent='Важных после разбора';cells[1].querySelector('small').textContent='С объяснением влияния';}if(cells[3]){cells[3].querySelector('label').textContent='Проверено разделов';cells[3].querySelector('small').textContent='Данные успешно загружены';}};
+renderStats=function(){baseStats();const cells=$('#stats').children;const ready=data.news.filter(n=>n.brief).length;const waiting=data.news.length-ready;
+ if(cells[1]){cells[1].querySelector('label').textContent='Важных среди разобранных';cells[1].querySelector('small').textContent=waiting?`Ещё ${waiting} не оценены`:'Все материалы оценены';if(!ready)cells[1].querySelector('strong').textContent='—';}
+ if(cells[2]){cells[2].querySelector('label').textContent='Разборы готовы';cells[2].querySelector('strong').textContent=ready;cells[2].querySelector('small').textContent='С выводами, основаниями и MD';}
+ if(cells[3]){cells[3].querySelector('label').textContent='Ещё обрабатываются';cells[3].querySelector('strong').textContent=waiting;cells[3].querySelector('small').textContent='Это не «неважные» новости';}
+ let progress=$('#backlogProgress');if(!progress){progress=el('div','backlog-progress');progress.id='backlogProgress';$('#stats').after(progress);}
+ const counts=data.backlog?.counts||{};
+ progress.replaceChildren(el('strong','',`Разобрано ${ready} из ${data.news.length}`),el('span','','Архив обрабатывается в облаке порциями каждый час. '+(data.backlog?.last_finished?'Последняя порция: '+formatDate(data.backlog.last_finished,true)+' ЕКБ. ':'')),el('span','',`Ожидают повтора: ${counts.retry||0}. Нужна проверка причины: ${counts.needs_operator||0}.`));
+ const bar=el('progress');bar.max=data.news.length;bar.value=ready;bar.setAttribute('aria-label','Прогресс разбора архива');progress.append(bar);
+};
+function failureText(raw){if(/429|routes unavailable|provider/i.test(raw))return 'Бесплатная модель временно недоступна или исчерпала лимит; будет повтор.';if(/OCR/i.test(raw))return 'PDF содержит скан и требует распознавания.';if(/too large|exceeds|chunk/i.test(raw))return 'Большой документ требует обработки частями.';if(/rejected|schema|evidence/i.test(raw))return 'Ответ модели не прошёл проверку качества; будет повтор.';return 'Не удалось завершить обработку. Подробности сохранены в журнале.';}
+async function readServerMarkdown(n){if(n.markdownUrl&&/^materials\/[a-f0-9]+\.md$/.test(n.markdownUrl)){const r=await fetch(n.markdownUrl,{cache:'no-store'});if(!r.ok)throw Error('MD unavailable');return await r.text();}return markdown(n);}
+$('#download').onclick=async()=>{try{downloadFile(await readServerMarkdown(current),'material-'+current.id+'.md');}catch{toast('Не удалось скачать MD. Попробуйте обновить страницу.');}};
+$('#copy').onclick=async()=>{try{await navigator.clipboard.writeText(await readServerMarkdown(current));toast('Markdown скопирован');}catch{toast('Не удалось скопировать; используйте скачивание MD.');}};
