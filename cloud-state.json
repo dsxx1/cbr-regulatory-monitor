@@ -502,66 +502,543 @@
     "cbr-events:32672": "1c82fae89335729811b184b671ce110e45aa9b4bdadc8b198f76c22d3cf80a9d",
     "cbr-events:32670": "fbb396361dfe97b296570e9807f4e9738df6a6af0b9499a05f160dfd1d4bcc7d",
     "cbr-events:32667": "e8ed94ff751e0eea78853157cce42c0ddbe2632505b38db47a12be0b4c29a57a",
-    "cbr-events:32662": "b7b86f46efe3eb98e0c1563024416d0423c5cb12e0473b3fd04c26e2ed184efe"
+    "cbr-events:32662": "b7b86f46efe3eb98e0c1563024416d0423c5cb12e0473b3fd04c26e2ed184efe",
+    "liga:2026-08-14:6abd8e695ae003ae": "ba0b0f0e37583deefd3e95eca80bf97d59749f289d156f69b2bdc1762332060e",
+    "sro:/1000018373.html": "602935c4160a6579d21e6266dd3a97f375d978195d6cc716fdb8aaac2df4a6ec",
+    "sro:/1000018372.html": "014797d3c58ddce663d71cba559c7be95f6f35d02231397851ca950c8d00a975",
+    "sro:/1000018371.html": "2d87f72e7160cb7be27d92855e0c721ec03ea261b060589deecbe82c35ceae14",
+    "sro:/1000018370.html": "8652c71f2488d64d8b728f9fa2216f5158d02e1d748b3797d591e447a5471433",
+    "sro:/1000018369.html": "f82515174273289973e4b199df9e4e1a503427d3b7e25111db90fbffb8def366",
+    "sro:/1000018368.html": "2c5dd0588fc32593071fd31c18659f3b1c8b6d629f7e5a0fd073063a42cdcb15",
+    "sro:/1000018367.html": "3b4cc7b3f54b1caf412a80d67e197ee520bfe0e5c82a9104c80a4722550446cb",
+    "sro:/1000018366.html": "cbcbb0b72351aab50c099bc2029469af8cf2d3eaaaad6a0a71903384232d959b",
+    "sro:/1000018365.html": "ea976ec0afbec94ed96bafe610f2ffaad9383f753305da62909ad20b1c541d73",
+    "sro:/1000018364.html": "fde04c4d44e1aacbc63c03d15b7105e84e0b838b5d7268b81c4d2a2d149d0296",
+    "sro:/1000018362.html": "6f3830bceb85411b0f47eaa2b57be139355958e9e9f09258ed1f149d6f8a0346",
+    "sro:/1000018363.html": "e2f37f9597e886adcbf3015f306024170b46ebd10de0afc30b6a2a546bc53db3",
+    "sro:/1000018360.html": "eb24fdffc4c5fa6f7d4ad245d97d661192763f823d134e01232e21041d19eb25",
+    "sro:/1000018361.html": "6089a66be9ae73d287235f410a354141c80199c1c269f935e127e70294c2f383",
+    "sro:/1000018359.html": "223b4cd6eacac1f1ac92b4f66cd9a75ad270e4ec043c81c268f7624ef92506f7",
+    "sro:/1000018358.html": "cfebac94435f62b2def31acc185cdb2cbed78199a52344ee752ffb02dd0a9a31",
+    "sro:/1000018357.html": "8ebad81d9570cd15787e431c4bd88e5f6fceb128fac0407ea25e2c736158daf5",
+    "sro:/1000018356.html": "5cfafe7e1dfb51b7b7a851af789562f7c6e29da72726d4902d67dd78ba94dc09",
+    "sro:/1000018355.html": "6804da294d70589ddd7a877644798c132d387f309079c6c1fec67795e7513582",
+    "sro:/1000018354.html": "c8046a71f97c35334df67e938daa9fe6d55404938f03bc4e8f2f4a84e331de44",
+    "sro:/1000018353.html": "7cd4d1a4a98300a114baf6983e7f92767d4caa7e9e9c8f6ddfd20d1d8d4f4ddd",
+    "sro:/1000018352.html": "eea00fb135c5888c5a5659d0f58968cfa7459a6f24232a1ed0c99b297a091a37",
+    "sro:/1000018351.html": "ae332f8ec85f54e199959fd99eb5da065bdd32822e3541f091783edecc5e4678",
+    "sro:/1000018350.html": "4dacd9d456a092323587188abca0557c3ed4c9a444ab7a27246dc101457c6087",
+    "sro:/1000018347.html": "f1be266af8227e710f4816626a42f9fee6beca68a3480a174a7810ffceb2853c",
+    "sro:/1000018346.html": "ac925ed8e953095938d2a31c70baefe27335fd43a427a01b558df40b943e4c79",
+    "sro:/1000018345.html": "2c7fb7efed115bdda3041d4d264c804620c020bfec28eb0b071a8831a30fb6a2",
+    "sro:/1000018344.html": "2c5dd0588fc32593071fd31c18659f3b1c8b6d629f7e5a0fd073063a42cdcb15",
+    "sro:/1000018349.html": "330d6c814d2c962e03cfa0d7398ea4a7366dd48f54c4f0d858a53b71cdc37122",
+    "sro:/1000018343.html": "64375c73c23a5d7d5931085e575da3ec2bba27646ca3f2cd550e09be88e38a9c",
+    "sro:/1000018341.html": "5afd8076e99113935efa68ee87a84e34a2de4d183bc4577e41584977337a2241",
+    "sro:/1000018340.html": "225f604a987c0c66a0aa8915d16416fdf102034a095eccf0a4a3763e18fee83b",
+    "sro:/1000018339.html": "13fc7d36f8f0ad4c59ac04330f3c39d5c3dcf382b6815e0acb1d28c2ec8cd513",
+    "sro:/1000018338.html": "0003b99e6e16673bd2d9a81d3ab501cecf229f01952e9a85419958ed9faa89a8",
+    "sro:/1000018337.html": "d18f9ea219b68a524dea8b0a765fd597acee2dfdfd63f93e4052986406da7930",
+    "sro:/1000018336.html": "d600c19209d0741fde6af3a95133f283c6267bd4db75f5ca5420537d4404abe7",
+    "sro:/1000018335.html": "4346f5a818c521ae3a30ae84ebcc098cfed509e7f09a3d09c84c3e07eb012319",
+    "sro:/1000018334.html": "5f76ceb732f5951b546229f6745428b80c9503313caec3f787d3fb10d010bcbc"
   },
-  "cards": [
-    {
-      "key": "control:explain:378:5485",
-      "title": "Каким образом должна быть сформирована и представлена в Банк России годовая бухгалтерская (финансовая) отчетность?",
-      "url": "https://www.cbr.ru/explain/378/",
-      "source": "Разъяснения, категория 378",
-      "analysis": {
-        "document_status": "разъяснение",
-        "obligation": "условно-обязательное",
-        "applicability_suggested": "касается",
-        "applicability_reason": "Документ прямо регулирует порядок формирования и представления отчетности именно ломбардами в Банк России.",
-        "applicability_confirmed": null,
-        "effective_date_suggested": "",
-        "effective_date_confirmed": null,
-        "areas": [
-          "документ",
-          "ИТ",
-          "отчётность"
-        ],
-        "requirements": [
-          {
-            "text": "Годовую бухгалтерскую (финансовую) отчетность ломбарда необходимо составлять в соответствии с требованиями Федерального закона от 06.12.2011 № 402-ФЗ «О бухгалтерском учете» и по формам, утвержденным приказом Минфина России от 02.07.2010 № 66н «О формах бухгалтерской отчетности организаций».",
-            "citation": "представляется годовая БФО ломбарда, составленная в соответствии с требованиями Федерального закона от 06.12.2011 № 402-ФЗ «О бухгалтерском учете» по формам, утвержденным приказом Минфина России от 02.07.2010 № 66н «О формах бухгалтерской отчетности организаций»",
-            "subject": "ломбарды"
-          },
-          {
-            "text": "Представление отчетности должно осуществляться в электронном виде с использованием Программы-анкеты подготовки электронных документов для ломбардов,放在ной на официальном сайте Банка России.",
-            "citation": "На официальном сайте Банка России в сети «Интернет» в разделе «Личный кабинет участника информационного обмена / Программы подготовки электронных документов участников информационного обмена» размещена актуальная Программа-анкета подготовки электронных документов для ломбардов версии 2.16.3 сборки 1.3.10.9 от 20.01.2020",
-            "subject": "ломбарды"
-          },
-          {
-            "text": "Электронный документ, содержащий годовую БФО, должен быть прикреплен к отчету о деятельности ломбарда при представлении его в Банк России.",
-            "citation": "в которой реализована возможность прикрепления электронного документа, содержащего годовую БФО ломбарда, к Отчету о деятельности ломбарда при представлении его в Банк России",
-            "subject": "ломбарды"
-          },
-          {
-            "text": "Отчет о деятельности ломбарда с прикрепленной БФО должен представляться не позднее 90 календарных дней по окончании календарного года.",
-            "citation": "представляемым не позднее 90 календарных дней по окончании календарного года",
-            "subject": "ломбарды"
-          },
-          {
-            "text": "При обновлении Программы-анкеты на сайте Банка России необходимо составлять отчет о деятельности ломбарда с годовой БФО в актуальной версии Программы-анкеты на дату представления в Банк России.",
-            "citation": "в случае обновления Программы-анкеты на сайте Банка России необходимо составлять Отчет о деятельности ломбарда с годовой БФО ломбарда в актуальной версии Программы-анкеты на дату представления в Банк России",
-            "subject": "ломбарды"
-          }
-        ],
-        "claims_rejected": 2,
-        "questions": [
-          "Какие конкретно временные послабления были введены письмом Банка России от 20.03.2020 № ИН-015-44/25?",
-          "Какова точная формулировка требований к формам отчетности, утвержденным приказом Минфина № 66н?"
-        ],
-        "model": "kilo-auto/free"
-      },
-      "checked": "2026-09-20T03:13:22.837677+00:00",
-      "control": true
-    }
-  ],
+  "cards": [],
   "queue": {
+    "sro:/1000018372.html:014797d3c58ddce663d71cba559c7be95f6f35d02231397851ca950c8d00a975": {
+      "key": "sro:/1000018372.html",
+      "source": "industry-sro",
+      "source_title": "СРО (отраслевой источник)",
+      "external_id": "sro:/1000018372.html",
+      "title": "Видеоролик о требованиях ПОД/ФТ для участников рынка ДМДК",
+      "body": "",
+      "url": "https://sro-lombard.ru/1000018372.html",
+      "published": "2026-09-09",
+      "modification": "",
+      "category": "",
+      "in_perimeter": true
+    },
+    "sro:/1000018371.html:2d87f72e7160cb7be27d92855e0c721ec03ea261b060589deecbe82c35ceae14": {
+      "key": "sro:/1000018371.html",
+      "source": "industry-sro",
+      "source_title": "СРО (отраслевой источник)",
+      "external_id": "sro:/1000018371.html",
+      "title": "В Службу финансового уполномоченного за время ее работы поступило около 1,2 млн. обращений потребителей (по кредитным кооперативам, ломбардам, НПФам – менее 1%)",
+      "body": "",
+      "url": "https://sro-lombard.ru/1000018371.html",
+      "published": "2026-09-08",
+      "modification": "",
+      "category": "",
+      "in_perimeter": true
+    },
+    "sro:/1000018370.html:8652c71f2488d64d8b728f9fa2216f5158d02e1d748b3797d591e447a5471433": {
+      "key": "sro:/1000018370.html",
+      "source": "industry-sro",
+      "source_title": "СРО (отраслевой источник)",
+      "external_id": "sro:/1000018370.html",
+      "title": "Общие изменения: для продления права администрировать домен теперь нужно каждый год проходить идентификацию в ЕСИА",
+      "body": "",
+      "url": "https://sro-lombard.ru/1000018370.html",
+      "published": "2026-09-07",
+      "modification": "",
+      "category": "",
+      "in_perimeter": true
+    },
+    "sro:/1000018369.html:f82515174273289973e4b199df9e4e1a503427d3b7e25111db90fbffb8def366": {
+      "key": "sro:/1000018369.html",
+      "source": "industry-sro",
+      "source_title": "СРО (отраслевой источник)",
+      "external_id": "sro:/1000018369.html",
+      "title": "Вступили в силу новые правила торговли: на что обратить внимание всем кто торгует в розницу (продает невостребованное имущество с витрины)",
+      "body": "",
+      "url": "https://sro-lombard.ru/1000018369.html",
+      "published": "2026-09-04",
+      "modification": "",
+      "category": "",
+      "in_perimeter": true
+    },
+    "sro:/1000018368.html:2c5dd0588fc32593071fd31c18659f3b1c8b6d629f7e5a0fd073063a42cdcb15": {
+      "key": "sro:/1000018368.html",
+      "source": "industry-sro",
+      "source_title": "СРО (отраслевой источник)",
+      "external_id": "sro:/1000018368.html",
+      "title": "ФСТЭК России обновил перечень организаций, осуществляющих образовательную деятельность в сфере информационной безопасности",
+      "body": "",
+      "url": "https://sro-lombard.ru/1000018368.html",
+      "published": "2026-09-03",
+      "modification": "",
+      "category": "",
+      "in_perimeter": true
+    },
+    "sro:/1000018367.html:3b4cc7b3f54b1caf412a80d67e197ee520bfe0e5c82a9104c80a4722550446cb": {
+      "key": "sro:/1000018367.html",
+      "source": "industry-sro",
+      "source_title": "СРО (отраслевой источник)",
+      "external_id": "sro:/1000018367.html",
+      "title": "С 1 сентября 2026 года вступил в силу новый порядок нанесения пробирных клейм",
+      "body": "",
+      "url": "https://sro-lombard.ru/1000018367.html",
+      "published": "2026-09-02",
+      "modification": "",
+      "category": "",
+      "in_perimeter": true
+    },
+    "sro:/1000018366.html:cbcbb0b72351aab50c099bc2029469af8cf2d3eaaaad6a0a71903384232d959b": {
+      "key": "sro:/1000018366.html",
+      "source": "industry-sro",
+      "source_title": "СРО (отраслевой источник)",
+      "external_id": "sro:/1000018366.html",
+      "title": "Открываем запись на бесплатное обучение сентября для участников Ассоциации развития ломбардов",
+      "body": "",
+      "url": "https://sro-lombard.ru/1000018366.html",
+      "published": "2026-09-01",
+      "modification": "",
+      "category": "",
+      "in_perimeter": true
+    },
+    "sro:/1000018365.html:ea976ec0afbec94ed96bafe610f2ffaad9383f753305da62909ad20b1c541d73": {
+      "key": "sro:/1000018365.html",
+      "source": "industry-sro",
+      "source_title": "СРО (отраслевой источник)",
+      "external_id": "sro:/1000018365.html",
+      "title": "Ломбарды и цифровой рубль",
+      "body": "",
+      "url": "https://sro-lombard.ru/1000018365.html",
+      "published": "2026-08-31",
+      "modification": "",
+      "category": "",
+      "in_perimeter": true
+    },
+    "sro:/1000018364.html:fde04c4d44e1aacbc63c03d15b7105e84e0b838b5d7268b81c4d2a2d149d0296": {
+      "key": "sro:/1000018364.html",
+      "source": "industry-sro",
+      "source_title": "СРО (отраслевой источник)",
+      "external_id": "sro:/1000018364.html",
+      "title": "Банк России предложил увеличить лимит для наличных займов в ломбардах в четыре раза",
+      "body": "",
+      "url": "https://sro-lombard.ru/1000018364.html",
+      "published": "2026-08-28",
+      "modification": "",
+      "category": "",
+      "in_perimeter": true
+    },
+    "sro:/1000018362.html:6f3830bceb85411b0f47eaa2b57be139355958e9e9f09258ed1f149d6f8a0346": {
+      "key": "sro:/1000018362.html",
+      "source": "industry-sro",
+      "source_title": "СРО (отраслевой источник)",
+      "external_id": "sro:/1000018362.html",
+      "title": "Обновлена Программа-анкета подготовки и направления электронных документов в личный кабинет участника информационного обмена (ЕСОД)",
+      "body": "",
+      "url": "https://sro-lombard.ru/1000018362.html",
+      "published": "2026-08-26",
+      "modification": "",
+      "category": "",
+      "in_perimeter": true
+    },
+    "sro:/1000018363.html:e2f37f9597e886adcbf3015f306024170b46ebd10de0afc30b6a2a546bc53db3": {
+      "key": "sro:/1000018363.html",
+      "source": "industry-sro",
+      "source_title": "СРО (отраслевой источник)",
+      "external_id": "sro:/1000018363.html",
+      "title": "Изменение отчетности, предоставляемой в Банк России - Указание Банка России № 7384-У",
+      "body": "",
+      "url": "https://sro-lombard.ru/1000018363.html",
+      "published": "2026-08-27",
+      "modification": "",
+      "category": "",
+      "in_perimeter": true
+    },
+    "sro:/1000018360.html:eb24fdffc4c5fa6f7d4ad245d97d661192763f823d134e01232e21041d19eb25": {
+      "key": "sro:/1000018360.html",
+      "source": "industry-sro",
+      "source_title": "СРО (отраслевой источник)",
+      "external_id": "sro:/1000018360.html",
+      "title": "Снижение регуляторной нагрузки на участников финансового рынка со стороны Банка России",
+      "body": "",
+      "url": "https://sro-lombard.ru/1000018360.html",
+      "published": "2026-08-24",
+      "modification": "",
+      "category": "",
+      "in_perimeter": true
+    },
+    "sro:/1000018361.html:6089a66be9ae73d287235f410a354141c80199c1c269f935e127e70294c2f383": {
+      "key": "sro:/1000018361.html",
+      "source": "industry-sro",
+      "source_title": "СРО (отраслевой источник)",
+      "external_id": "sro:/1000018361.html",
+      "title": "Роскомнадзор подвел итоги работы в сфере персональных данных за 2025-й и 1-е полугодие 2026 г.",
+      "body": "",
+      "url": "https://sro-lombard.ru/1000018361.html",
+      "published": "2026-08-25",
+      "modification": "",
+      "category": "",
+      "in_perimeter": true
+    },
+    "sro:/1000018359.html:223b4cd6eacac1f1ac92b4f66cd9a75ad270e4ec043c81c268f7624ef92506f7": {
+      "key": "sro:/1000018359.html",
+      "source": "industry-sro",
+      "source_title": "СРО (отраслевой источник)",
+      "external_id": "sro:/1000018359.html",
+      "title": "Использование нового сертификата для представления отчетности и обмена сообщениями в ЛК ЦБ с 22.08.2026",
+      "body": "",
+      "url": "https://sro-lombard.ru/1000018359.html",
+      "published": "2026-08-21",
+      "modification": "",
+      "category": "",
+      "in_perimeter": true
+    },
+    "sro:/1000018358.html:cfebac94435f62b2def31acc185cdb2cbed78199a52344ee752ffb02dd0a9a31": {
+      "key": "sro:/1000018358.html",
+      "source": "industry-sro",
+      "source_title": "СРО (отраслевой источник)",
+      "external_id": "sro:/1000018358.html",
+      "title": "Перевод Личного кабинета ЦБ РФ на использование SSL-сертификатов Национального удостоверяющего центра Минцифры России",
+      "body": "",
+      "url": "https://sro-lombard.ru/1000018358.html",
+      "published": "2026-08-21",
+      "modification": "",
+      "category": "",
+      "in_perimeter": true
+    },
+    "sro:/1000018357.html:8ebad81d9570cd15787e431c4bd88e5f6fceb128fac0407ea25e2c736158daf5": {
+      "key": "sro:/1000018357.html",
+      "source": "industry-sro",
+      "source_title": "СРО (отраслевой источник)",
+      "external_id": "sro:/1000018357.html",
+      "title": "«Схема Долиной» не сработала: в Твери суд встал на сторону ломбарда в споре с клиентом",
+      "body": "",
+      "url": "https://sro-lombard.ru/1000018357.html",
+      "published": "2026-08-20",
+      "modification": "",
+      "category": "",
+      "in_perimeter": true
+    },
+    "sro:/1000018356.html:5cfafe7e1dfb51b7b7a851af789562f7c6e29da72726d4902d67dd78ba94dc09": {
+      "key": "sro:/1000018356.html",
+      "source": "industry-sro",
+      "source_title": "СРО (отраслевой источник)",
+      "external_id": "sro:/1000018356.html",
+      "title": "Информационное письмо Банка России о мерах поддержки отдельных финансовых организаций, зарегистрированных на территории Республики Крым и города федерального значения Севастополя",
+      "body": "",
+      "url": "https://sro-lombard.ru/1000018356.html",
+      "published": "2026-08-19",
+      "modification": "",
+      "category": "",
+      "in_perimeter": true
+    },
+    "sro:/1000018355.html:6804da294d70589ddd7a877644798c132d387f309079c6c1fec67795e7513582": {
+      "key": "sro:/1000018355.html",
+      "source": "industry-sro",
+      "source_title": "СРО (отраслевой источник)",
+      "external_id": "sro:/1000018355.html",
+      "title": "Завершаем запись на бесплатное обучение августа для участников Ассоциации развития ломбардов",
+      "body": "",
+      "url": "https://sro-lombard.ru/1000018355.html",
+      "published": "2026-08-19",
+      "modification": "",
+      "category": "",
+      "in_perimeter": true
+    },
+    "sro:/1000018354.html:c8046a71f97c35334df67e938daa9fe6d55404938f03bc4e8f2f4a84e331de44": {
+      "key": "sro:/1000018354.html",
+      "source": "industry-sro",
+      "source_title": "СРО (отраслевой источник)",
+      "external_id": "sro:/1000018354.html",
+      "title": "Ювелир и закон \"Тогда мы идем к вам: Минфин усиливает контроль за ювелирами и ломбардами\"",
+      "body": "",
+      "url": "https://sro-lombard.ru/1000018354.html",
+      "published": "2026-08-18",
+      "modification": "",
+      "category": "",
+      "in_perimeter": true
+    },
+    "sro:/1000018353.html:7cd4d1a4a98300a114baf6983e7f92767d4caa7e9e9c8f6ddfd20d1d8d4f4ddd": {
+      "key": "sro:/1000018353.html",
+      "source": "industry-sro",
+      "source_title": "СРО (отраслевой источник)",
+      "external_id": "sro:/1000018353.html",
+      "title": "На сайте Банка России была опубликована новая версия Анкеты-редактора для составления отчетности о деятельности и персональном составе руководящих органов ломбарда",
+      "body": "",
+      "url": "https://sro-lombard.ru/1000018353.html",
+      "published": "2026-08-17",
+      "modification": "",
+      "category": "",
+      "in_perimeter": true
+    },
+    "sro:/1000018352.html:eea00fb135c5888c5a5659d0f58968cfa7459a6f24232a1ed0c99b297a091a37": {
+      "key": "sro:/1000018352.html",
+      "source": "industry-sro",
+      "source_title": "СРО (отраслевой источник)",
+      "external_id": "sro:/1000018352.html",
+      "title": "Определен размер полной стоимости кредита (займа) в ломбарде на 4 квартал 2026 года",
+      "body": "",
+      "url": "https://sro-lombard.ru/1000018352.html",
+      "published": "2026-08-14",
+      "modification": "",
+      "category": "",
+      "in_perimeter": true
+    },
+    "sro:/1000018351.html:ae332f8ec85f54e199959fd99eb5da065bdd32822e3541f091783edecc5e4678": {
+      "key": "sro:/1000018351.html",
+      "source": "industry-sro",
+      "source_title": "СРО (отраслевой источник)",
+      "external_id": "sro:/1000018351.html",
+      "title": "Обновлена Учетная политика для ломбарда",
+      "body": "",
+      "url": "https://sro-lombard.ru/1000018351.html",
+      "published": "2026-08-13",
+      "modification": "",
+      "category": "",
+      "in_perimeter": true
+    },
+    "sro:/1000018350.html:4dacd9d456a092323587188abca0557c3ed4c9a444ab7a27246dc101457c6087": {
+      "key": "sro:/1000018350.html",
+      "source": "industry-sro",
+      "source_title": "СРО (отраслевой источник)",
+      "external_id": "sro:/1000018350.html",
+      "title": "Ломбардам нужно быть внимательнее к рекламе и объявлениям: Свердловское УФАС признало ненадлежащей рекламу ломбарда",
+      "body": "",
+      "url": "https://sro-lombard.ru/1000018350.html",
+      "published": "2026-08-12",
+      "modification": "",
+      "category": "",
+      "in_perimeter": true
+    },
+    "sro:/1000018347.html:f1be266af8227e710f4816626a42f9fee6beca68a3480a174a7810ffceb2853c": {
+      "key": "sro:/1000018347.html",
+      "source": "industry-sro",
+      "source_title": "СРО (отраслевой источник)",
+      "external_id": "sro:/1000018347.html",
+      "title": "В России появились первые \"зубры\" из Белоруссии",
+      "body": "",
+      "url": "https://sro-lombard.ru/1000018347.html",
+      "published": "2026-08-10",
+      "modification": "",
+      "category": "",
+      "in_perimeter": true
+    },
+    "sro:/1000018346.html:ac925ed8e953095938d2a31c70baefe27335fd43a427a01b558df40b943e4c79": {
+      "key": "sro:/1000018346.html",
+      "source": "industry-sro",
+      "source_title": "СРО (отраслевой источник)",
+      "external_id": "sro:/1000018346.html",
+      "title": "РИА Новости: в России увеличилось число ломбардов",
+      "body": "",
+      "url": "https://sro-lombard.ru/1000018346.html",
+      "published": "2026-08-07",
+      "modification": "",
+      "category": "",
+      "in_perimeter": true
+    },
+    "sro:/1000018345.html:2c7fb7efed115bdda3041d4d264c804620c020bfec28eb0b071a8831a30fb6a2": {
+      "key": "sro:/1000018345.html",
+      "source": "industry-sro",
+      "source_title": "СРО (отраслевой источник)",
+      "external_id": "sro:/1000018345.html",
+      "title": "Рекомендации пользователям ГИИС ДМДК от разработчиков в связи с нестабильной работой зарубежных DNS-серверов",
+      "body": "",
+      "url": "https://sro-lombard.ru/1000018345.html",
+      "published": "2026-08-06",
+      "modification": "",
+      "category": "",
+      "in_perimeter": true
+    },
+    "sro:/1000018344.html:2c5dd0588fc32593071fd31c18659f3b1c8b6d629f7e5a0fd073063a42cdcb15": {
+      "key": "sro:/1000018344.html",
+      "source": "industry-sro",
+      "source_title": "СРО (отраслевой источник)",
+      "external_id": "sro:/1000018344.html",
+      "title": "ФСТЭК России обновил перечень организаций, осуществляющих образовательную деятельность в сфере информационной безопасности",
+      "body": "",
+      "url": "https://sro-lombard.ru/1000018344.html",
+      "published": "2026-08-05",
+      "modification": "",
+      "category": "",
+      "in_perimeter": true
+    },
+    "sro:/1000018349.html:330d6c814d2c962e03cfa0d7398ea4a7366dd48f54c4f0d858a53b71cdc37122": {
+      "key": "sro:/1000018349.html",
+      "source": "industry-sro",
+      "source_title": "СРО (отраслевой источник)",
+      "external_id": "sro:/1000018349.html",
+      "title": "Мошенники стали маскироваться под ломбарды: юрист предупредил об опасных сообщениях от ломбардов",
+      "body": "",
+      "url": "https://sro-lombard.ru/1000018349.html",
+      "published": "2026-08-08",
+      "modification": "",
+      "category": "",
+      "in_perimeter": true
+    },
+    "sro:/1000018343.html:64375c73c23a5d7d5931085e575da3ec2bba27646ca3f2cd550e09be88e38a9c": {
+      "key": "sro:/1000018343.html",
+      "source": "industry-sro",
+      "source_title": "СРО (отраслевой источник)",
+      "external_id": "sro:/1000018343.html",
+      "title": "\"Ювелир и закон\": Банк России рассылает ломбардам требования предоставить документы, подтверждающие переход на ЕПС",
+      "body": "",
+      "url": "https://sro-lombard.ru/1000018343.html",
+      "published": "2026-08-04",
+      "modification": "",
+      "category": "",
+      "in_perimeter": true
+    },
+    "sro:/1000018341.html:5afd8076e99113935efa68ee87a84e34a2de4d183bc4577e41584977337a2241": {
+      "key": "sro:/1000018341.html",
+      "source": "industry-sro",
+      "source_title": "СРО (отраслевой источник)",
+      "external_id": "sro:/1000018341.html",
+      "title": "Аналитика первой половины 2026 года от ЦБ РФ: граждане стали чаще жаловаться на МФО и реже – на страховщиков и брокеров",
+      "body": "",
+      "url": "https://sro-lombard.ru/1000018341.html",
+      "published": "2026-08-03",
+      "modification": "",
+      "category": "",
+      "in_perimeter": true
+    },
+    "sro:/1000018340.html:225f604a987c0c66a0aa8915d16416fdf102034a095eccf0a4a3763e18fee83b": {
+      "key": "sro:/1000018340.html",
+      "source": "industry-sro",
+      "source_title": "СРО (отраслевой источник)",
+      "external_id": "sro:/1000018340.html",
+      "title": "На сайте Банка России была размещена обновленная версия Анкеты-редактора для подготовки отчетности об операциях с денежными средствами",
+      "body": "",
+      "url": "https://sro-lombard.ru/1000018340.html",
+      "published": "2026-07-30",
+      "modification": "",
+      "category": "",
+      "in_perimeter": true
+    },
+    "sro:/1000018339.html:13fc7d36f8f0ad4c59ac04330f3c39d5c3dcf382b6815e0acb1d28c2ec8cd513": {
+      "key": "sro:/1000018339.html",
+      "source": "industry-sro",
+      "source_title": "СРО (отраслевой источник)",
+      "external_id": "sro:/1000018339.html",
+      "title": "Установлена возможность освобождения от административной ответственности при условии исполнения соглашения, заключенного с контрольным (надзорным) органом",
+      "body": "",
+      "url": "https://sro-lombard.ru/1000018339.html",
+      "published": "2026-07-29",
+      "modification": "",
+      "category": "",
+      "in_perimeter": true
+    },
+    "sro:/1000018338.html:0003b99e6e16673bd2d9a81d3ab501cecf229f01952e9a85419958ed9faa89a8": {
+      "key": "sro:/1000018338.html",
+      "source": "industry-sro",
+      "source_title": "СРО (отраслевой источник)",
+      "external_id": "sro:/1000018338.html",
+      "title": "Открываем запись на бесплатное обучение августа для участников Ассоциации развития ломбардов - вебинар «Организация учета ДМДК»",
+      "body": "",
+      "url": "https://sro-lombard.ru/1000018338.html",
+      "published": "2026-07-28",
+      "modification": "",
+      "category": "",
+      "in_perimeter": true
+    },
+    "sro:/1000018337.html:d18f9ea219b68a524dea8b0a765fd597acee2dfdfd63f93e4052986406da7930": {
+      "key": "sro:/1000018337.html",
+      "source": "industry-sro",
+      "source_title": "СРО (отраслевой источник)",
+      "external_id": "sro:/1000018337.html",
+      "title": "Новости региональных отделений Банка России - как меняется рынок ломбардов в Тамбовской области: итоги первого квартала",
+      "body": "",
+      "url": "https://sro-lombard.ru/1000018337.html",
+      "published": "2026-07-27",
+      "modification": "",
+      "category": "",
+      "in_perimeter": true
+    },
+    "sro:/1000018336.html:d600c19209d0741fde6af3a95133f283c6267bd4db75f5ca5420537d4404abe7": {
+      "key": "sro:/1000018336.html",
+      "source": "industry-sro",
+      "source_title": "СРО (отраслевой источник)",
+      "external_id": "sro:/1000018336.html",
+      "title": "Новости региональных отделений Банка России - до 99% годовых и чужие вывески: Банк России выявил в Новосибирской области ещё три нелегальные компании",
+      "body": "",
+      "url": "https://sro-lombard.ru/1000018336.html",
+      "published": "2026-07-24",
+      "modification": "",
+      "category": "",
+      "in_perimeter": true
+    },
+    "sro:/1000018335.html:4346f5a818c521ae3a30ae84ebcc098cfed509e7f09a3d09c84c3e07eb012319": {
+      "key": "sro:/1000018335.html",
+      "source": "industry-sro",
+      "source_title": "СРО (отраслевой источник)",
+      "external_id": "sro:/1000018335.html",
+      "title": "Председатель Ассоциации приняла участие в программе ОТРажение: из МФО в ломбарды? Как меняется рынок быстрых денег",
+      "body": "",
+      "url": "https://sro-lombard.ru/1000018335.html",
+      "published": "2026-07-23",
+      "modification": "",
+      "category": "",
+      "in_perimeter": true
+    },
+    "sro:/1000018334.html:5f76ceb732f5951b546229f6745428b80c9503313caec3f787d3fb10d010bcbc": {
+      "key": "sro:/1000018334.html",
+      "source": "industry-sro",
+      "source_title": "СРО (отраслевой источник)",
+      "external_id": "sro:/1000018334.html",
+      "title": "Скорректированы некоторые формы бухгалтерской (финансовой) отчетности отдельных некредитных финансовых организаций, бюро кредитных историй, кредитных рейтинговых агентств",
+      "body": "",
+      "url": "https://sro-lombard.ru/1000018334.html",
+      "published": "2026-07-22",
+      "modification": "",
+      "category": "",
+      "in_perimeter": true
+    },
+    "control:explain:378:5485": {
+      "key": "explain:378:5485",
+      "source": "cbr-explain",
+      "source_title": "Разъяснения, категория 378",
+      "external_id": "5485",
+      "title": "Каким образом должна быть сформирована и представлена в Банк России годовая бухгалтерская (финансовая) отчетность?",
+      "body": "Ответ Департамента обработки отчетности Банка России от 12.03.2020 № 47-2-3/601 с учетом информационного письма Банка России от 20.03.2020 № ИН-015-44/25: В соответствии с абзацем 7 пункта 2 Указания Банка России от 30.12.2015 № 3927-У «О формах, сроках и порядке составления и представления в Банк России документов, содержащих отчет о деятельности ломбарда и отчет о персональном составе руководящих органов ломбарда» вместе с отчетом о деятельности ломбарда по форме 0420890 за 2019 год (далее — Отчет о деятельности ломбарда), представляемым не позднее 90 календарных дней по окончании календарного года, представляется годовая БФО ломбарда, составленная в соответствии с требованиями Федерального закона от 06.12.2011 № 402-ФЗ «О бухгалтерском учете» по формам, утвержденным приказом Минфина России от 02.07.2010 № 66н «О формах бухгалтерской отчетности организаций». На официальном сайте Банка России в сети «Интернет» в разделе «Личный кабинет участника информационного обмена / Программы подготовки электронных документов участников информационного обмена» размещена актуальная Программа-анкета подготовки электронных документов для ломбардов версии 2.16.3 сборки 1.3.10.9 от 20.01.2020 (далее — Программа-анкета), в которой реализована возможность прикрепления электронного документа, содержащего годовую БФО ломбарда, к Отчету о деятельности ломбарда при представлении его в Банк России не позднее установленного срока. Дополнительно сообщаем, что в случае обновления Программы-анкеты на сайте Банка России необходимо составлять Отчет о деятельности ломбарда с годовой БФО ломбарда в актуальной версии Программы-анкеты на дату представления в Банк России. Также обращаем внимание, что в 2020 году в соответствии с письмом Банка России от 20.03.2020 № ИН-015-44/25 Банк России вводит временные регуляторные и надзорные послабления в отношении ломбардов в части порядка предоставления в Банк России отчета о деятельности ломбарда на период осуществления мероприятий по предотвращению распространения новой коронавирусной инфекции.",
+      "url": "https://www.cbr.ru/explain/378/",
+      "published": "",
+      "modification": "2023-02-13T19:23:36.337",
+      "category": "378",
+      "in_perimeter": true
+    },
     "control:explain:378:9028": {
       "key": "explain:378:9028",
       "source": "cbr-explain",
@@ -574,11 +1051,37 @@
       "modification": "2024-02-07T13:20:19.43",
       "category": "378",
       "in_perimeter": true
+    },
+    "liga:2026-08-14:6abd8e695ae003ae:ba0b0f0e37583deefd3e95eca80bf97d59749f289d156f69b2bdc1762332060e": {
+      "key": "liga:2026-08-14:6abd8e695ae003ae",
+      "source": "industry-liga",
+      "source_title": "Лига ломбардов (отраслевой источник)",
+      "external_id": "liga:2026-08-14:6abd8e695ae003ae",
+      "title": "14 августа 2026 г. / Предельные значения ПСК на IV квартал 2026 года по потребительским займам / Банк России разместил на своем официальном сайте среднерыночные и предельные значения ПСК , которые будут применяться в четвертом ква",
+      "body": "14 августа 2026 г. / Предельные значения ПСК на IV квартал 2026 года по потребительским займам / Банк России разместил на своем официальном сайте среднерыночные и предельные значения ПСК , которые будут применяться в четвертом квартале 2026 г : Лига ломбардов",
+      "url": "https://www.ligalomb.ru/index-text.htm#2026-08-14",
+      "published": "2026-08-14",
+      "modification": "",
+      "category": "",
+      "in_perimeter": true
+    },
+    "sro:/1000018373.html:602935c4160a6579d21e6266dd3a97f375d978195d6cc716fdb8aaac2df4a6ec": {
+      "key": "sro:/1000018373.html",
+      "source": "industry-sro",
+      "source_title": "СРО (отраслевой источник)",
+      "external_id": "sro:/1000018373.html",
+      "title": "ТАСС: Новые правила приема ломбардами изделий без клейма попросили ввести досрочно",
+      "body": "",
+      "url": "https://sro-lombard.ru/1000018373.html",
+      "published": "2026-09-10",
+      "modification": "",
+      "category": "",
+      "in_perimeter": true
     }
   },
   "status": {
-    "checked": "2026-09-20T03:13:22.837677+00:00",
-    "documents": 538,
+    "checked": "2026-09-20T03:16:29.976093+00:00",
+    "documents": 343,
     "sources": [
       {
         "name": "Дерево категорий 426",
@@ -602,13 +1105,13 @@
       },
       {
         "name": "Правовые акты ЦБ: Некредитные финансовые организации",
-        "status": "ok",
-        "detail": "документов: 47"
+        "status": "ошибка",
+        "detail": "HTTP Error 502: Bad Gateway"
       },
       {
         "name": "Правовые акты ЦБ: Бухгалтерский учет и отчетность в НФО",
-        "status": "ok",
-        "detail": "документов: 187"
+        "status": "ошибка",
+        "detail": "HTTP Error 502: Bad Gateway"
       },
       {
         "name": "RSS: Проекты нормативных актов",
@@ -629,18 +1132,26 @@
         "name": "RSS: События и комментарии",
         "status": "ok",
         "detail": "записей: 100, в периметре: 2"
+      },
+      {
+        "name": "Лига ломбардов",
+        "status": "ok",
+        "detail": "Материалов в окне: 1; single_public_archive_not_verified_complete"
+      },
+      {
+        "name": "СРО",
+        "status": "ok",
+        "detail": "Материалов в окне: 38; current_news_window_only; older_archive_not_collected"
       }
     ],
-    "llm_calls": 2,
-    "accepted": 1,
-    "rejected": 1,
-    "pending": 1,
-    "llm_errors": [
-      "Truncated model response"
-    ],
+    "llm_calls": 3,
+    "accepted": 0,
+    "rejected": 3,
+    "pending": 41,
+    "llm_errors": [],
     "receipts": [
       {
-        "model": "dots-studio/dots-3-note-preview:free",
+        "model": "poolside/laguna-s-2.1:free",
         "pricing": {
           "prompt": "0",
           "completion": "0",
@@ -652,11 +1163,11 @@
           "internal_reasoning": "0"
         },
         "usage": {
-          "prompt_tokens": 1748,
-          "completion_tokens": 6000,
-          "total_tokens": 7748,
+          "prompt_tokens": 2325,
+          "completion_tokens": 1437,
+          "total_tokens": 3762,
           "cost": 0,
-          "is_byok": false,
+          "is_byok": true,
           "prompt_tokens_details": {
             "cached_tokens": 0,
             "cache_write_tokens": 0,
@@ -669,14 +1180,14 @@
             "upstream_inference_completions_cost": 0
           },
           "completion_tokens_details": {
-            "reasoning_tokens": 7808,
+            "reasoning_tokens": 0,
             "image_tokens": 0,
             "audio_tokens": 0
           }
         }
       },
       {
-        "model": "dots-studio/dots-3-note-preview:free",
+        "model": "poolside/laguna-s-2.1:free",
         "pricing": {
           "prompt": "0",
           "completion": "0",
@@ -688,11 +1199,11 @@
           "internal_reasoning": "0"
         },
         "usage": {
-          "prompt_tokens": 1283,
-          "completion_tokens": 1604,
-          "total_tokens": 2887,
+          "prompt_tokens": 919,
+          "completion_tokens": 465,
+          "total_tokens": 1384,
           "cost": 0,
-          "is_byok": false,
+          "is_byok": true,
           "prompt_tokens_details": {
             "cached_tokens": 0,
             "cache_write_tokens": 0,
@@ -705,13 +1216,57 @@
             "upstream_inference_completions_cost": 0
           },
           "completion_tokens_details": {
-            "reasoning_tokens": 377,
+            "reasoning_tokens": 0,
+            "image_tokens": 0,
+            "audio_tokens": 0
+          }
+        }
+      },
+      {
+        "model": "poolside/laguna-s-2.1:free",
+        "pricing": {
+          "prompt": "0",
+          "completion": "0",
+          "input_cache_read": "0",
+          "input_cache_write": "0",
+          "request": "0",
+          "image": "0",
+          "web_search": "0",
+          "internal_reasoning": "0"
+        },
+        "usage": {
+          "prompt_tokens": 732,
+          "completion_tokens": 201,
+          "total_tokens": 933,
+          "cost": 0,
+          "is_byok": true,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "cache_write_tokens": 0,
+            "audio_tokens": 0,
+            "video_tokens": 0
+          },
+          "cost_details": {
+            "upstream_inference_cost": 0,
+            "upstream_inference_prompt_cost": 0,
+            "upstream_inference_completions_cost": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
             "image_tokens": 0,
             "audio_tokens": 0
           }
         }
       }
-    ]
+    ],
+    "review_calls": 2,
+    "review_results": [],
+    "review_errors": [
+      "Independent review unavailable",
+      "Independent review unavailable"
+    ],
+    "review_receipts": []
   },
-  "pending_message": "Мониторинг регулирования — контрольный запуск\nПроверено публикаций: 538. LLM: 1/2 ответов прошли проверку.\nМодель бесплатная; цитаты сверены с источником. Применимость подтверждает специалист.\n\nКонтрольный пример из архива: Каким образом должна быть сформирована и представлена в Банк России годовая бухгалтерская (финансовая) отчетность?\nhttps://www.cbr.ru/explain/378/\n• Годовую бухгалтерскую (финансовую) отчетность ломбарда необходимо составлять в соответствии с требованиями Федерального закона от 06.12.2011 № 402-ФЗ «О бухгалтерском учете» и по формам, утвержденным приказом Минфина России от 02.07.2010 № 66н «О формах бухгалтерской отчетности организаций».\nОснование: «представляется годовая БФО ломбарда, составленная в соответствии с требованиями Федерального закона от 06.12.2011 № 402-ФЗ «О бухгалтерском учете» по формам, утвержденным приказом Минфина России от 02.07.2010 № 66н «О формах бухгалтерской отчетности организаций»»\n• Представление отчетности должно осуществляться в электронном виде с использованием Программы-анкеты подготовки электронных документов для ломбардов,放在ной на официальном сайте Банка России.\nОснование: «На официальном сайте Банка России в сети «Интернет» в разделе «Личный кабинет участника информационного обмена / Программы подготовки электронных документов участников информационного обмена» размещена актуальная Программа-анкета подготовки электронных документов для ломбардов версии 2.16.3 сборки 1.3.10.9 от 20.01.2020»\nНе прошли проверку: 1. Сохранены для повторной обработки.\nDashboard: https://dsxx1.github.io/cbr-regulatory-monitor/"
+  "pending_message": "Мониторинг регулирования — контрольный запуск\nПроверено публикаций: 343. LLM: 0/3 ответов прошли проверку.\nМодель бесплатная; цитаты сверены с источником. Применимость подтверждает специалист.\nНе прошли проверку: 3. Сохранены для повторной обработки.\nНе ответили источники: Правовые акты ЦБ: Некредитные финансовые организации, Правовые акты ЦБ: Бухгалтерский учет и отчетность в НФО\nDashboard: https://dsxx1.github.io/cbr-regulatory-monitor/",
+  "quality_version": 2
 }
