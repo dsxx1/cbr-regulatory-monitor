@@ -32,6 +32,16 @@ class Text(HTMLParser):
 
 
 def fetch_text(url):
+    if urlparse(url).hostname not in ALLOWED:
+        from custom_sources import load,fetch,html_text
+        if not any(urlparse(s['url']).hostname==urlparse(url).hostname for s in load()):
+            raise ValueError('Source is outside the public allowlist')
+        raw,charset,mime=fetch(url)
+        if mime=='application/pdf' or raw.startswith(b'%PDF'):
+            from pdf_extract import extract_pdf
+            return extract_pdf(raw)
+        if mime not in ('text/html','text/plain'):raise ValueError('Unsupported document format')
+        return html_text(raw,charset)
     if urlparse(url).scheme!='https' or urlparse(url).hostname not in ALLOWED:
         raise ValueError('Source is outside the public allowlist')
     with urlopen(Request(url,headers={'User-Agent':'RegulatoryMonitor/1.0'}),timeout=25) as response:

@@ -43,6 +43,9 @@ def main():
         source_log.append({'name':item['source'],'status':'ok' if 'count' in item else 'ошибка',
                            'detail':f"Материалов в окне: {item.get('count',0)}; {item['stop']}"})
     control = os.environ.get('CONTROL_RUN') == 'yes'
+    from custom_sources import collect as collect_custom
+    extra,extra_log=collect_custom()
+    documents.extend(extra);source_log.extend(extra_log)
     if state.get('quality_version') != 2:
         # First cloud pilot was never delivered (confirmed insufficient_scope).
         # Only reviewed cards may enter the new outgoing queue.

@@ -24,6 +24,7 @@ DELIVERY_LOCK = threading.Lock()
 CHILDREN = set()
 CHILD_LOCK = threading.Lock()
 AUTH = None
+LAB_LOCK = threading.Lock()
 
 
 def now():
@@ -77,7 +78,7 @@ def init():
         CREATE TABLE IF NOT EXISTS outbox(id TEXT PRIMARY KEY, message TEXT, state TEXT, error TEXT);
         CREATE TABLE IF NOT EXISTS tasks(id TEXT PRIMARY KEY, task_id INTEGER, state TEXT, error TEXT);
         ''')
-        c.execute("UPDATE jobs SET state='interrupted',error='Контейнер остановлен; запустите проверку повторно' WHERE state='running'")
+        c.execute("UPDATE jobs SET state='interrupted',error='Процесс остановлен; запустите проверку повторно' WHERE state='running'")
         c.execute("INSERT OR IGNORE INTO settings VALUES('schedule','off')")
         if not c.execute("SELECT 1 FROM settings WHERE key='baseline'").fetchone():
             for card in json.loads(Path('public/news.json').read_text(encoding='utf-8'))['news']:
@@ -108,6 +109,19 @@ def run_script(name, *args, timeout=1200):
         raise RuntimeError(f'Превышено время этапа {name}') from None
     finally:
         with CHILD_LOCK: CHILDREN.discard(child)
+
+
+def run_model(command,*,input,text,encoding,capture_output,timeout):
+    child=subprocess.Popen(command,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=text,encoding=encoding,
+        creationflags=subprocess.CREATE_NEW_PROCESS_GROUP if os.name=='nt' else 0,start_new_session=os.name!='nt')
+    with CHILD_LOCK:CHILDREN.add(child)
+    try:
+        output,error=child.communicate(input=input,timeout=timeout)
+        return subprocess.CompletedProcess(command,child.returncode,output,error)
+    except subprocess.TimeoutExpired:
+        stop_child(child);raise
+    finally:
+        with CHILD_LOCK:CHILDREN.discard(child)
 
 
 def stop_child(child):
@@ -170,7 +184,10 @@ def worker(job_id):
         collect_outbox()
         deliver()
         run_script('dashboard_export.py')
-        with db() as c: c.execute("UPDATE jobs SET state='done',stage='Проверка завершена',finished=? WHERE id=?", (now(), job_id))
+        with db() as c:
+            pending=c.execute("SELECT count(*) FROM outbox WHERE state='pending'").fetchone()[0]
+            stage=f'Сбор завершён; ожидают отправки: {pending}' if pending else 'Проверка завершена'
+            c.execute("UPDATE jobs SET state='done',stage=?,finished=? WHERE id=?", (stage,now(), job_id))
     except Exception as exc:
         print(f'[{now()}] Проверка не завершена: {str(exc)[:150]}', flush=True)
         with db() as c: c.execute("UPDATE jobs SET state='failed',error=?,finished=? WHERE id=?", (str(exc)[:150], now(), job_id))
@@ -243,6 +260,9 @@ class Handler(SimpleHTTPRequestHandler):
         self.end_headers(); self.wfile.write(raw)
     def do_GET(self):
         route=urlparse(self.path).path
+        if route=='/api/sources':
+            from custom_sources import load
+            return self.reply(200,{'sources':load()})
         if route == '/news.json':
             value=json.loads((DATA/'public/news.json').read_text(encoding='utf-8'))
             if not self.owner():
@@ -294,9 +314,27 @@ class Handler(SimpleHTTPRequestHandler):
             return self.reply(403, {'error':'Обновите страницу'})
         try:
             length = int(self.headers.get('Content-Length','0'))
-            if not 0 <= length <= 4096: return self.reply(413, {'error':'Too large'})
+            if not 0 <= length <= (24576 if self.path=='/api/model-test' else 4096): return self.reply(413, {'error':'Слишком большой запрос'})
             value = json.loads(self.rfile.read(length) or '{}')
+            if not isinstance(value,dict):raise ValueError('Нужен объект параметров')
+            if self.path == '/api/model-test':
+                if not LAB_LOCK.acquire(blocking=False):return self.reply(429,{'error':'Один тест модели уже выполняется. Дождитесь ответа.'})
+                try:
+                    from model_lab import ask
+                    result=ask(value.get('model'),value.get('message'),runner=run_model)
+                    return self.reply(200,result)
+                finally:LAB_LOCK.release()
             if self.path == '/api/check': return self.reply(202, {'job':start_job()})
+            if self.path == '/api/sources':
+                from custom_sources import add
+                with LOCK: result=add(value.get('name'),value.get('url'),value.get('kind'))
+                return self.reply(201,result)
+            if self.path == '/api/backup':
+                with LOCK,db() as c:
+                    if c.execute("SELECT 1 FROM jobs WHERE state='running'").fetchone():
+                        return self.reply(409,{'error':'Дождитесь окончания текущей проверки для согласованной резервной копии.'})
+                    from runtime_backup import create_backup
+                    return self.reply(200,create_backup(DATA))
             if self.path == '/api/schedule':
                 enabled = 'on' if value.get('enabled') is True else 'off'
                 with db() as c: c.execute("UPDATE settings SET value=? WHERE key='schedule'", (enabled,))

@@ -24,6 +24,7 @@ def safe_url(url):
 
 def document_type(doc):
     source = doc.get('source','')
+    if source=='custom-page':return 'Изменение страницы'
     if source == 'cbr-na': return 'Правовой акт'
     if 'explain' in source or 'explain:' in doc.get('key',''): return 'Разъяснение'
     if 'project' in source: return 'Проект акта'

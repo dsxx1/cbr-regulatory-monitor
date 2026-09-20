@@ -50,7 +50,7 @@ def order(doc):
     return (1 if relevant else 2,-ordinal,key)
 
 
-def process(doc,cached):
+def process(doc,cached,model_config=None):
     item=dict(doc)
     try:
         if cached.get('body'):item['body']=cached['body']
@@ -58,7 +58,10 @@ def process(doc,cached):
     except Exception as exc:
         return item,None,'source',type(exc).__name__+': '+str(exc)[:180]
     try:
-        result=analyze_material(item)
+        if model_config is None:
+            from dashboard_export import settings
+            model_config=settings()
+        result=analyze_material(item,model_config['generator'],model_config['reviewer'])
         return item,result,'ok',''
     except Exception as exc:
         return item,None,'model',type(exc).__name__+': '+str(exc)[:180]
@@ -71,6 +74,8 @@ def main():
     if args.checkpoint_git and os.environ.get('GITHUB_REPOSITORY')!='dsxx1/cbr-regulatory-monitor':
         raise ValueError('Git checkpoints are allowed only in this project Actions runner')
     now=datetime.now(timezone.utc).isoformat();docs=catalog()
+    from dashboard_export import settings
+    model_config=settings()
     queue=read('analysis-queue.json',{'items':{}});items=queue['items']
     cache=read('source-cache.json',{});briefs=read('material-briefs.json',{})
     cache={k:v for k,v in cache.items() if v.get('extracted') or len(v.get('body',''))>=120}
@@ -85,7 +90,7 @@ def main():
     queue['last_started']=now
     save('analysis-queue.json',queue);save('source-cache.json',cache);save('material-briefs.json',briefs)
     def work(doc):
-        if not args.hydrate_only:return process(doc,cache.get(doc['key'],{}))
+        if not args.hydrate_only:return process(doc,cache.get(doc['key'],{}),model_config)
         item=dict(doc)
         try:
             if len(item.get('body',''))<120:item['body']=fetch_text(item['url'])
