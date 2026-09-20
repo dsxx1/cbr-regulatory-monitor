@@ -50,8 +50,10 @@ def main():
         methods = call('methods', {})
         if isinstance(methods, dict):
             methods = methods.get('methods', [])
-        print(json.dumps({'bot_register_available': 'imbot.v2.Bot.register' in methods,
-            'bot_send_available': 'imbot.v2.Chat.Message.send' in methods,
+        lower = [str(m).lower() for m in methods]
+        print(json.dumps({'bot_register_available': 'imbot.v2.bot.register' in lower,
+            'bot_send_available': 'imbot.v2.chat.message.send' in lower,
+            'bot_methods': [m for m in methods if 'imbot' in str(m).lower()][:12],
             'chat_read_available': 'im.dialog.get' in methods}))
         chat = call('im.dialog.get', {'DIALOG_ID':DIALOG})
         print(json.dumps({'chat_verified':str(chat.get('id')) == '374331',
