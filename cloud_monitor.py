@@ -3,6 +3,7 @@ import hashlib
 import html
 import json
 import os
+import re
 import sys
 from datetime import datetime, timezone, date, timedelta
 from pathlib import Path
@@ -18,7 +19,7 @@ def quality(analysis, text):
     if not isinstance(analysis,dict) or not analysis.get('requirements'):
         return False
     # Literal, case-sensitive match is stricter than the legacy normalizer.
-    return all(isinstance(r,dict) and isinstance(r.get('text'),str) and
+    return all(isinstance(r,dict) and isinstance(r.get('text'),str) and not re.search(r'[\u3400-\u9fff]',r['text']) and
         len(r.get('citation','')) >= 25 and r['citation'] in text for r in analysis['requirements'])
 
 
@@ -66,8 +67,16 @@ def main():
         'Не дополняй источник внешними знаниями.')
     accepted, rejected = [], []
     review_results = []
-    for key, doc in list(state['queue'].items())[:3]:
+    candidates = list(state['queue'].items())
+    if control:
+        candidates = [(k,d) for k,d in candidates if k.startswith('control:')]
+    for key, doc in candidates[:3]:
         text = doc['title']+'\n'+doc['body']
+        if len(doc['body']) < 120:
+            state.setdefault('needs_full_text',{})[key] = doc
+            del state['queue'][key]
+            rejected.append(key)
+            continue
         analysis = analyzer.analyze(text)
         approved = False
         if quality(analysis,text):
@@ -80,7 +89,8 @@ def main():
                 reviewer.errors.append('Independent review unavailable')
         if approved:
             card = {'key':key,'title':doc['title'],'url':doc['url'],'source':doc['source_title'],
-                    'analysis':analysis,'checked':now,'control':key.startswith('control:')}
+                    'analysis':analysis,'checked':now,'control':key.startswith('control:'),
+                    'source_date':doc.get('published') or doc.get('modification','')}
             accepted.append(card)
             state['cards'].append(card)
             del state['queue'][key]
@@ -93,6 +103,7 @@ def main():
     status = {'checked':now,'documents':len(documents),'sources':source_log,
               'llm_calls':analyzer.calls,'accepted':len(accepted),'rejected':len(rejected),
               'pending':len(state['queue']),'llm_errors':analyzer.errors,'receipts':analyzer.receipts}
+    status['needs_full_text'] = len(state.get('needs_full_text',{}))
     status.update({'review_calls':reviewer.calls,'review_results':review_results,
                    'review_errors':reviewer.errors,'review_receipts':reviewer.receipts})
     state['status'] = status
@@ -102,7 +113,8 @@ def main():
                  f'Проверено публикаций: {len(documents)}. LLM: {len(accepted)}/{analyzer.calls} ответов прошли проверку.',
                  'Модель бесплатная; цитаты сверены с источником. Применимость подтверждает специалист.']
         for card in accepted:
-            lines.extend(['',('Контрольный пример из архива: ' if card['control'] else '')+card['title'][:220],card['url']])
+            lines.extend(['',('Контрольный пример из архива: ' if card['control'] else '')+card['title'][:220],
+                          'Дата в источнике: '+card.get('source_date','не определена'),card['url']])
             for req in card['analysis']['requirements'][:2]:
                 lines.extend(['• '+req['text'][:600], 'Основание: «'+req['citation'][:800]+'»'])
         if rejected:
@@ -124,6 +136,7 @@ def main():
     for entry in source_log:
         page += '<p>'+e(entry['name'])+': '+e(entry['status'])+'</p>'
     page += '<p>Второй проход LLM: '+str(reviewer.calls)+' проверок. Отклонено или недоступно: '+str(len(rejected))+'.</p>'
+    page += '<p>Требуют полного текста перед анализом: '+str(status['needs_full_text'])+'.</p>'
     if analyzer.errors or reviewer.errors:
         page += '<p>Ошибки модели: '+e('; '.join(analyzer.errors+reviewer.errors))+'</p>'
     for card in reversed(state['cards']):

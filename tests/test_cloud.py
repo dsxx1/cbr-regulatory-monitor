@@ -10,6 +10,7 @@ class CloudTests(unittest.TestCase):
         self.assertTrue(quality(result, quote))
         self.assertFalse(quality(result,'Другой текст источника'))
         self.assertFalse(quality({'requirements':[]},quote))
+        self.assertFalse(quality({'requirements':[{'text':'放在ной текст','citation':quote}]},quote))
 
     def test_wrong_portal_cannot_receive_messages(self):
         with patch.dict('os.environ',{'B24_WEBHOOK':'https://example.com/rest/x/'},clear=True):
