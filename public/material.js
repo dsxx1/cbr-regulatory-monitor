@@ -37,7 +37,7 @@ readerRender=function(){
  if(readerTab!=='summary')return;
  root.replaceChildren();
  const intro=el('div','brief-intro');intro.append(pill(eventNames[b.event_status]||b.event_status),el('p','lead',b.summary));root.append(intro);
- const importance=el('div','importance-box '+n.priority);importance.append(el('strong','',priorities[n.priority]+' важность'),el('p','',b.priority_reason),el('small','',importanceMeaning[n.priority]));root.append(importance);
+ const importance=el('div','importance-box '+n.priority);importance.append(el('strong','',({high:'Высокая важность',medium:'Средняя важность',low:'Низкая важность',news:'Информационный материал',unknown:'Нужна оценка'})[n.priority]),el('p','',b.priority_reason),el('small','',importanceMeaning[n.priority]));root.append(importance);
  headingText(root,'Что меняется для ломбарда',b.impact);
  headingText(root,'Когда и на каком основании',b.timing);
  bulletSection(root,'Что стоит сделать',b.actions);
@@ -88,3 +88,5 @@ function failureText(raw){if(/429|routes unavailable|provider/i.test(raw))return
 async function readServerMarkdown(n){if(n.markdownUrl&&/^materials\/[a-f0-9]+\.md$/.test(n.markdownUrl)){const r=await fetch(n.markdownUrl,{cache:'no-store'});if(!r.ok)throw Error('MD unavailable');return await r.text();}return markdown(n);}
 $('#download').onclick=async()=>{try{downloadFile(await readServerMarkdown(current),'material-'+current.id+'.md');}catch{toast('Не удалось скачать MD. Попробуйте обновить страницу.');}};
 $('#copy').onclick=async()=>{try{await navigator.clipboard.writeText(await readServerMarkdown(current));toast('Markdown скопирован');}catch{toast('Не удалось скопировать; используйте скачивание MD.');}};
+const baseQualityView=qualityView;
+qualityView=function(){baseQualityView();const b=data.backlog||{},c=b.counts||{};const p=panel('Обработка всего архива',`Готово: ${c.verified||0}. Ожидает первого разбора: ${c.pending||0}. Запланирован повтор: ${c.retry||0}. Нужна проверка причины: ${c.needs_operator||0}.`);if(b.last_finished)p.append(el('p','','Последняя завершённая порция: '+formatDate(b.last_finished,true)+' ЕКБ'));for(const n of data.news.filter(n=>n.processing?.error).slice(0,8)){const row=el('div','source-row');row.append(el('strong','',n.title),el('small','',failureText(n.processing.error)));p.append(row);}$('#qualityView').prepend(p);};
