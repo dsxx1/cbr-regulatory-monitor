@@ -1,0 +1,137 @@
+{
+  "checked": "2026-09-20T03:13:22.837677+00:00",
+  "documents": 538,
+  "sources": [
+    {
+      "name": "Дерево категорий 426",
+      "status": "ok",
+      "detail": "подкатегорий: 1"
+    },
+    {
+      "name": "Разъяснения, категория 774",
+      "status": "ok",
+      "detail": "записей: 17"
+    },
+    {
+      "name": "Разъяснения, категория 378",
+      "status": "ok",
+      "detail": "записей: 11"
+    },
+    {
+      "name": "Правовые акты ЦБ: Ломбарды",
+      "status": "ok",
+      "detail": "документов: 54"
+    },
+    {
+      "name": "Правовые акты ЦБ: Некредитные финансовые организации",
+      "status": "ok",
+      "detail": "документов: 47"
+    },
+    {
+      "name": "Правовые акты ЦБ: Бухгалтерский учет и отчетность в НФО",
+      "status": "ok",
+      "detail": "документов: 187"
+    },
+    {
+      "name": "RSS: Проекты нормативных актов",
+      "status": "ok",
+      "detail": "записей: 9, в периметре: 2"
+    },
+    {
+      "name": "RSS: Пресс-релизы",
+      "status": "ok",
+      "detail": "записей: 13, в периметре: 7"
+    },
+    {
+      "name": "RSS: Новое на сайте",
+      "status": "ok",
+      "detail": "записей: 100, в периметре: 16"
+    },
+    {
+      "name": "RSS: События и комментарии",
+      "status": "ok",
+      "detail": "записей: 100, в периметре: 2"
+    }
+  ],
+  "llm_calls": 2,
+  "accepted": 1,
+  "rejected": 1,
+  "pending": 1,
+  "llm_errors": [
+    "Truncated model response"
+  ],
+  "receipts": [
+    {
+      "model": "dots-studio/dots-3-note-preview:free",
+      "pricing": {
+        "prompt": "0",
+        "completion": "0",
+        "input_cache_read": "0",
+        "input_cache_write": "0",
+        "request": "0",
+        "image": "0",
+        "web_search": "0",
+        "internal_reasoning": "0"
+      },
+      "usage": {
+        "prompt_tokens": 1748,
+        "completion_tokens": 6000,
+        "total_tokens": 7748,
+        "cost": 0,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 0,
+          "upstream_inference_prompt_cost": 0,
+          "upstream_inference_completions_cost": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 7808,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      }
+    },
+    {
+      "model": "dots-studio/dots-3-note-preview:free",
+      "pricing": {
+        "prompt": "0",
+        "completion": "0",
+        "input_cache_read": "0",
+        "input_cache_write": "0",
+        "request": "0",
+        "image": "0",
+        "web_search": "0",
+        "internal_reasoning": "0"
+      },
+      "usage": {
+        "prompt_tokens": 1283,
+        "completion_tokens": 1604,
+        "total_tokens": 2887,
+        "cost": 0,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 0,
+          "upstream_inference_prompt_cost": 0,
+          "upstream_inference_completions_cost": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 377,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      }
+    }
+  ]
+}
