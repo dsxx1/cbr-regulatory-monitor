@@ -684,9 +684,11 @@
       "last_attempt": "2026-09-20T04:42:32.177527+00:00"
     },
     "liga:2026-08-14:6abd8e695ae003ae": {
-      "state": "pending",
+      "state": "verified",
       "attempts": 0,
-      "last_attempt": "2026-09-20T04:42:32.211528+00:00"
+      "last_attempt": "2026-09-20T04:53:14.526301+00:00",
+      "error": "",
+      "retry_at": null
     },
     "liga:2026-07-20:51cdf80b0db5a414": {
       "state": "pending",
@@ -1508,9 +1510,11 @@
       "last_attempt": "2026-09-20T04:42:38.289160+00:00"
     },
     "sro:/1000018367.html": {
-      "state": "pending",
+      "state": "verified",
       "attempts": 0,
-      "last_attempt": "2026-09-20T04:42:38.323874+00:00"
+      "last_attempt": "2026-09-20T04:51:41.862133+00:00",
+      "error": "",
+      "retry_at": null
     },
     "sro:/1000018366.html": {
       "state": "pending",
@@ -1535,9 +1539,12 @@
       "last_attempt": "2026-09-20T04:42:38.463630+00:00"
     },
     "sro:/1000018363.html": {
-      "state": "pending",
-      "attempts": 0,
-      "last_attempt": "2026-09-20T04:42:38.503714+00:00"
+      "state": "retry",
+      "attempts": 1,
+      "last_attempt": "2026-09-20T04:51:55.846349+00:00",
+      "error": "RuntimeError: Free provider failure: Error: Free routes unavailable: [{\"route\":\"poolside/laguna-s-2.1:free\",\"error\":\"Error: HTTP 429\"},{\"route\":\"inclusionai/ling-3.0-flash-vl:free\",\"error\":\"Erro",
+      "failure_stage": "model",
+      "retry_at": "2026-09-20T05:21:55.846368+00:00"
     },
     "sro:/1000018360.html": {
       "state": "pending",
@@ -1550,9 +1557,11 @@
       "last_attempt": "2026-09-20T04:42:38.573111+00:00"
     },
     "sro:/1000018359.html": {
-      "state": "pending",
+      "state": "verified",
       "attempts": 0,
-      "last_attempt": "2026-09-20T04:42:38.606889+00:00"
+      "last_attempt": "2026-09-20T04:52:08.304626+00:00",
+      "error": "",
+      "retry_at": null
     },
     "sro:/1000018358.html": {
       "state": "pending",
@@ -1580,9 +1589,11 @@
       "last_attempt": "2026-09-20T04:42:38.785476+00:00"
     },
     "sro:/1000018353.html": {
-      "state": "pending",
+      "state": "verified",
       "attempts": 0,
-      "last_attempt": "2026-09-20T04:42:38.825233+00:00"
+      "last_attempt": "2026-09-20T04:52:31.763975+00:00",
+      "error": "",
+      "retry_at": null
     },
     "sro:/1000018352.html": {
       "state": "pending",
@@ -1634,9 +1645,11 @@
       "last_attempt": "2026-09-20T04:42:39.161774+00:00"
     },
     "sro:/1000018340.html": {
-      "state": "pending",
+      "state": "verified",
       "attempts": 0,
-      "last_attempt": "2026-09-20T04:42:39.198292+00:00"
+      "last_attempt": "2026-09-20T04:53:12.433451+00:00",
+      "error": "",
+      "retry_at": null
     },
     "sro:/1000018339.html": {
       "state": "pending",
@@ -2077,12 +2090,12 @@
       "last_attempt": "2026-09-20T04:42:46.373633+00:00"
     }
   },
-  "last_started": "2026-09-20T04:45:52.991477+00:00",
-  "last_finished": "2026-09-20T04:45:53.081063+00:00",
+  "last_started": "2026-09-20T04:51:10.489723+00:00",
+  "last_finished": "2026-09-20T04:53:14.561890+00:00",
   "counts": {
-    "pending": 369,
-    "retry": 27,
-    "verified": 3,
+    "pending": 363,
+    "retry": 28,
+    "verified": 8,
     "needs_operator": 0
   },
   "total": 399
