@@ -59,7 +59,8 @@ def init():
     AUTH = OwnerAuth(DATA)
     sid = os.environ.get('MONITOR_OWNER_SID')
     if os.name == 'nt' and sid:
-        subprocess.run(['icacls',str(AUTH.path),'/inheritance:r','/grant:r','*'+sid+':(F)','*S-1-5-18:(F)'],check=True,capture_output=True)
+        secret_path=Path(os.environ.get('B24_SECRET_FILE',APP/'secrets.txt'))
+        if secret_path.exists():subprocess.run(['icacls',str(secret_path),'/inheritance:r','/grant:r','*'+sid+':(F)','*S-1-5-18:(F)'],check=True,capture_output=True)
     for name in ('cloud-state.json', 'news-catalog.json', 'material-briefs.json', 'source-cache.json',
                  'analysis-queue.json', 'monitor-settings.json', 'llm-health.json'):
         if not (DATA / name).exists() and (APP / name).exists():
@@ -245,11 +246,41 @@ def create_task(card_id):
         raise ValueError('Не удалось подтвердить создание задачи. Проверьте права «Задачи» и журнал Б24.') from None
 
 
+class BoundedServer(ThreadingHTTPServer):
+    def __init__(self,*args,**kwargs):
+        self.slots=threading.BoundedSemaphore(32)
+        super().__init__(*args,**kwargs)
+    def process_request(self,request,address):
+        if not self.slots.acquire(blocking=False):
+            try:request.sendall(b'HTTP/1.0 503 Service Unavailable\r\nContent-Length: 0\r\nConnection: close\r\n\r\n')
+            finally:self.close_request(request)
+            return
+        try:super().process_request(request,address)
+        except Exception:self.slots.release();raise
+    def process_request_thread(self,request,address):
+        try:super().process_request_thread(request,address)
+        finally:self.slots.release()
+
+
 class Handler(SimpleHTTPRequestHandler):
+    def setup(self):
+        super().setup()
+        self.connection.settimeout(15)
+    def end_headers(self):
+        self.send_header('Content-Security-Policy',"default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'")
+        self.send_header('X-Frame-Options','DENY')
+        self.send_header('X-Content-Type-Options','nosniff')
+        self.send_header('Referrer-Policy','no-referrer')
+        self.send_header('Permissions-Policy','camera=(), microphone=(), geolocation=()')
+        super().end_headers()
+    def do_HEAD(self):
+        self.send_error(405)
     def __init__(self, *args, **kwargs): super().__init__(*args, directory=str(DATA/'public'), **kwargs)
     def log_message(self, *args): pass
     def owner(self):
-        return AUTH is not None and AUTH.allowed(self.client_address[0],self.headers.get('Cookie'))
+        # Explicit passwordless owner mode: only this PC via literal loopback host.
+        # Requiring both peer and Host prevents LAN clients and DNS rebinding from becoming owner.
+        return AUTH is not None and AUTH.local(self.client_address[0]) and urlparse('http://'+self.headers.get('Host','')).hostname in ('localhost','127.0.0.1','::1')
     def list_directory(self,path):
         self.send_error(404)
         return None
@@ -295,19 +326,8 @@ class Handler(SimpleHTTPRequestHandler):
         origin = self.headers.get('Origin')
         if origin and urlparse(origin).netloc != self.headers.get('Host'):
             return self.reply(403, {'error':'Недопустимый источник запроса'})
-        if self.path == '/api/login':
-            if not AUTH.local(self.client_address[0]) or not origin or urlparse(origin).hostname not in ('localhost','127.0.0.1'):
-                return self.reply(403, {'error':'Вход владельца доступен только на этом ПК'})
-            try:
-                size=int(self.headers.get('Content-Length','0'))
-                if not 0<size<512: raise ValueError()
-                token=AUTH.login(self.client_address[0],json.loads(self.rfile.read(size)).get('key'))
-                if not token: return self.reply(403,{'error':'Неверный ключ'})
-                self.send_response(200)
-                self.send_header('Set-Cookie','monitor_owner='+token+'; HttpOnly; SameSite=Strict; Path=/; Max-Age=28800')
-                self.send_header('Cache-Control','no-store');self.send_header('Content-Length','2')
-                self.end_headers();self.wfile.write(b'{}');return
-            except (ValueError,TypeError): return self.reply(400,{'error':'Некорректный запрос'})
+        if self.path in ('/api/login','/api/login-ticket','/api/login-code','/api/logout'):
+            return self.reply(404,{'error':'Вход не требуется: управление доступно на этом ПК через localhost'})
         if not self.owner():
             return self.reply(403, {'error':'Управление доступно только владельцу'})
         if self.headers.get('X-Monitor-Token') != TOKEN:
@@ -370,7 +390,7 @@ def scheduler():
 if __name__ == '__main__':
     init()
     threading.Thread(target=scheduler, daemon=True).start()
-    server = ThreadingHTTPServer((os.environ.get('MONITOR_BIND','0.0.0.0'),int(os.environ.get('MONITOR_PORT','8080'))),Handler)
+    server = BoundedServer((os.environ.get('MONITOR_BIND','0.0.0.0'),int(os.environ.get('MONITOR_PORT','8080'))),Handler)
     print('Мониторинг запущен. Сайт: http://localhost:'+str(server.server_port), flush=True)
     print('Расписание управляется на сайте. Ctrl+C останавливает процесс и его задания.', flush=True)
     try:

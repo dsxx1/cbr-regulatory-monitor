@@ -2,13 +2,17 @@
 let serviceState=null;
 document.documentElement.dataset.role='viewer';
 document.documentElement.dataset.theme='light';
+document.title='РегКонтроль · новости и требования для ломбардов';
+$('.brand>span:last-child').textContent='РегКонтроль';$('.brandmark').textContent='РК';
+$('.sitefooter span').textContent='РегКонтроль · источники и проверяемые выводы';
 const restricted=new Set(['quality','settings','lab']);
 titles.lab=['Проверка моделей','Отдельный запрос к бесплатной модели, без отправки в Б24.'];
 const labSection=el('section','owner-only');labSection.id='labView';labSection.hidden=true;$('#main').append(labSection);
-const labNavigation=el('button','nav owner-only','Проверка моделей');labNavigation.dataset.view='lab';labNavigation.onclick=()=>{if(data)switchView('lab');};$('.sidebar nav').append(labNavigation);
+const labNavigation=el('button','nav','Проверка LLM');labNavigation.dataset.view='lab';labNavigation.onclick=()=>{if(!serviceState?.owner)return openLogin();if(data)switchView('lab');};$('.sidebar nav').append(labNavigation);
 const originalSwitch=switchView;
 switchView=function(next){return originalSwitch(restricted.has(next)&&!serviceState?.owner?'feed':next);};
 const statusLine=el('div','service-line');statusLine.setAttribute('role','status');$('.page-heading').after(statusLine);
+function openLogin(){toast('Управление доступно на компьютере с мониторингом: http://localhost:8787');}
 const adminControls=el('div','owner-controls owner-only');$('.topbar').append(adminControls);
 const runButton=el('button','button primary','Проверить новости');
 const menu=el('details','control-menu');menu.append(el('summary','','Управление'));
@@ -81,7 +85,7 @@ sourcesView=async function(){
 };
 qualityView=function(){if(!serviceState?.owner)return;const root=$('#qualityView');root.replaceChildren();const h=serviceState.health||{};root.append(panel('Работа бесплатных моделей',`${h.attempts||0} попыток · ${h.responses||0} ответов · ${h.failures||0} отказов. Полученный ответ ещё не означает, что разбор прошёл проверку.`));const history=panel('Последние проверки');for(const j of serviceState.history||[])history.append(el('p','',`№${j.id} · ${j.stage} · ${formatDate(j.started,true)}${j.error?' · '+j.error:''}`));root.append(history);const events=panel('Последние обращения к моделям');for(const e of (h.events||[]).slice(-12).reverse())events.append(el('p','',`${e.route} · ${e.status==='response'?'Ответ получен':'Отказ'} · ${(e.ms/1000).toFixed(1)} с`));root.append(events);};
 settingsView=function(){if(!serviceState?.owner)return;const root=$('#settingsView');root.replaceChildren();const p=panel('Настройки анализа','Изменения применяются со следующего запуска. Используются только бесплатные маршруты.');const config=serviceState.settings;for(const [key,label] of [['generator','Генератор'],['reviewer','Проверяющий']]){const row=el('label','setting',label);const s=el('select');s.id='setting-'+key;for(const name of data.models){const o=el('option','',name);o.value=name;s.append(o);}s.value=config[key];row.append(s);p.append(row);}const row=el('label','setting','Материалов за проверку');const limit=el('select');limit.id='setting-max';for(let i=1;i<=5;i++){const o=el('option','',String(i));o.value=i;limit.append(o);}limit.value=config.max_calls;row.append(limit);p.append(row);const save=el('button','button primary','Сохранить');save.onclick=async()=>{try{serviceState.settings=await post('/api/settings',draftSettings());toast('Настройки сохранены');}catch(e){toast(e.message);}};p.append(save);root.append(p);};
-async function initializeAccess(){const match=location.hash.match(/^#owner=([A-Za-z0-9_-]+)$/);if(match){history.replaceState(null,'',location.pathname+'#feed');try{await post('/api/login',{key:match[1]});location.reload();return;}catch(e){toast(e.message);}}await refreshService();}
+async function initializeAccess(){const desired=location.hash.slice(1);await refreshService();if(serviceState?.owner&&data&&restricted.has(desired))switchView(desired);}
 initializeAccess();setInterval(refreshService,10000);
 
 function labView(){
