@@ -1,0 +1,94 @@
+"""Cloud-only Bitrix24 delivery. Credentials never leave the Actions runner."""
+import argparse
+import hashlib
+import hmac
+import json
+import os
+from pathlib import Path
+from urllib.parse import urlparse
+from urllib.request import Request, urlopen
+from urllib.error import HTTPError
+
+PORTAL = 'sks-portal.bitrix24.ru'
+DIALOG = 'chat374331'
+
+
+def call(method, params):
+    base = os.environ.get('B24_WEBHOOK', '').rstrip('/')
+    if urlparse(base).hostname != PORTAL or urlparse(base).scheme != 'https':
+        raise RuntimeError('B24 target missing or does not match approved portal')
+    request = Request(base+'/'+method+'.json', data=json.dumps(params).encode(),
+                      headers={'Content-Type':'application/json'})
+    try:
+        with urlopen(request, timeout=30) as response:
+            data = json.load(response)
+    except HTTPError as exc:
+        # Only controlled error code, never webhook URL or response description.
+        try:
+            code = json.load(exc).get('error','HTTP_ERROR')
+        except Exception:
+            code = 'HTTP_ERROR'
+        raise RuntimeError(f'{method}: HTTP {exc.code} {str(code)[:80]}') from None
+    except Exception as exc:
+        raise RuntimeError(f'{method}: {type(exc).__name__}') from None
+    if data.get('error'):
+        raise RuntimeError(f'{method}: {str(data["error"])[:80]}')
+    return data.get('result')
+
+
+def token():
+    return hmac.new(os.environ['B24_WEBHOOK'].rstrip('/').encode(),
+                    b'cbr-monitor-bot-v1', hashlib.sha256).hexdigest()[:40]
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--probe', action='store_true')
+    parser.add_argument('--message', default='runtime/message.txt')
+    args = parser.parse_args()
+    if args.probe:
+        methods = call('methods', {})
+        if isinstance(methods, dict):
+            methods = methods.get('methods', [])
+        print(json.dumps({'bot_register_available': 'imbot.v2.Bot.register' in methods,
+            'bot_send_available': 'imbot.v2.Chat.Message.send' in methods,
+            'chat_read_available': 'im.dialog.get' in methods}))
+        chat = call('im.dialog.get', {'DIALOG_ID':DIALOG})
+        print(json.dumps({'chat_verified':str(chat.get('id')) == '374331',
+                          'chat_title':chat.get('name', chat.get('title',''))}, ensure_ascii=False))
+        return
+    message = Path(args.message).read_text(encoding='utf-8')
+    if not message.strip():
+        print('Nothing to send')
+        return
+    registered = call('imbot.v2.Bot.register', {'fields':{'code':'cbr_regulatory_monitor_v1',
+        'botToken':token(), 'eventMode':'fetch','type':'bot',
+        'properties':{'name':'Мониторинг регулирования','workPosition':'ЦБ · ломбарды · проверяемые источники'}}})
+    bot_id = registered['bot']['id']
+    members = call('im.chat.user.list', {'CHAT_ID':374331})
+    if str(bot_id) not in [str(x) for x in members]:
+        call('im.chat.user.add', {'CHAT_ID':374331,'USERS':[bot_id],'HIDE_HISTORY':'Y'})
+    key = 'RM-CLOUD-'+hashlib.sha256(message.encode()).hexdigest()[:20]
+    previous = call('im.dialog.messages.get', {'DIALOG_ID':DIALOG,'LIMIT':50})
+    for item in previous.get('messages', []):
+        if key in item.get('text','') and str(item.get('author_id')) == str(bot_id):
+            print('Already delivered; no duplicate')
+            return
+    result = call('imbot.v2.Chat.Message.send', {'botId':bot_id,'botToken':token(),
+        'dialogId':DIALOG,'fields':{'message':message[:19000]+'\n'+key,'urlPreview':False}})
+    if not isinstance(result,dict) or not isinstance(result.get('id'),int):
+        raise RuntimeError('No confirmed message ID; do not retry blindly')
+    history = call('im.dialog.messages.get', {'DIALOG_ID':DIALOG,'LIMIT':20})
+    verified = any(str(m.get('id')) == str(result['id']) and str(m.get('author_id')) == str(bot_id)
+                   for m in history.get('messages',[]))
+    print(json.dumps({'delivered':True,'read_back_verified':verified,'message_id':result['id'],'bot_id':bot_id}))
+    if not verified:
+        raise RuntimeError('Message accepted, but read-back not verified; inspect chat before retry')
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except RuntimeError as exc:
+        print(str(exc))
+        raise SystemExit(1)
