@@ -2,6 +2,8 @@
 import argparse
 import json
 import time
+import os
+import subprocess
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
@@ -64,7 +66,10 @@ def process(doc,cached):
 
 def main():
     p=argparse.ArgumentParser();p.add_argument('--limit',type=int,default=6);p.add_argument('--workers',type=int,default=2)
-    p.add_argument('--hydrate-only',action='store_true');p.add_argument('--focus-only',action='store_true');args=p.parse_args()
+    p.add_argument('--hydrate-only',action='store_true');p.add_argument('--focus-only',action='store_true')
+    p.add_argument('--checkpoint-git',action='store_true');args=p.parse_args()
+    if args.checkpoint_git and os.environ.get('GITHUB_REPOSITORY')!='dsxx1/cbr-regulatory-monitor':
+        raise ValueError('Git checkpoints are allowed only in this project Actions runner')
     now=datetime.now(timezone.utc).isoformat();docs=catalog()
     queue=read('analysis-queue.json',{'items':{}});items=queue['items']
     cache=read('source-cache.json',{});briefs=read('material-briefs.json',{})
@@ -101,6 +106,12 @@ def main():
                 record['retry_at']=(datetime.now(timezone.utc)+timedelta(minutes=min(1440,30*2**(record['attempts']-1)))).isoformat()
             print(json.dumps({'key':key,'stage':stage,'state':record['state'],'error':error},ensure_ascii=False),flush=True)
             save('source-cache.json',cache);save('material-briefs.json',briefs);save('analysis-queue.json',queue)
+            if args.checkpoint_git:
+                subprocess.run(['git','add','source-cache.json','material-briefs.json','analysis-queue.json'],check=True)
+                changed=subprocess.run(['git','diff','--staged','--quiet']).returncode
+                if changed:
+                    subprocess.run(['git','commit','-q','-m','Backlog checkpoint: '+key],check=True)
+                    subprocess.run(['git','push','-q','origin','HEAD:main'],check=True)
     queue['last_finished']=datetime.now(timezone.utc).isoformat()
     queue['counts']={state:sum(r['state']==state for r in items.values()) for state in ('pending','retry','verified','needs_operator')}
     queue['total']=len(items)
